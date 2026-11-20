@@ -1,0 +1,2247 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0B120E">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Hisab Pro — Enterprise Offline Ledger & POS</title>
+<style>
+:root{
+  --ink:#0B120E; --bg:#EEF3EF; --card:#FFFFFF; --text:#0B120E; --mute:#5C6B62; --line:#D8E2DB;
+  --due:#B42B3A; --due-bg:#FBE9EB; --ok:#17803F; --ok-bg:#E1F4E8; --gold:#9A6A10; --gold-bg:#FBF0D9;
+  --accent:#11803F; --onaccent:#FFFFFF; --hero:#0B120E; --cash:#0B120E; --esewa:#3E9B2A; --khalti:#6B3FA8; --ecash:#C9922B;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Devanagari","Helvetica Neue",sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root{ color-scheme:dark; --ink:#3DDC84; --bg:#070B08; --card:#101712; --text:#E8F3EC; --mute:#93A69A; --line:#1F2B24;
+    --due:#FF8A95; --due-bg:#3A1C28; --ok:#3DDC84; --ok-bg:#123322; --gold:#E3B04B; --gold-bg:#3A2E14;
+    --accent:#3DDC84; --onaccent:#04130A; --hero:#12301F; --cash:#E8F3EC; --esewa:#6CCB55; --khalti:#B08CF0; --ecash:#E3B04B; }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.45;overscroll-behavior-y:contain}
+button{font:inherit;color:inherit;cursor:pointer}
+input,select,textarea{font:inherit;color:var(--text)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+#app{max-width:440px;margin:0 auto;min-height:100vh;min-height:100dvh;position:relative;padding-bottom:104px}
+.noscroll{overflow:hidden}
+.serif{font-family:var(--serif)}
+h1,h2,h3{margin:0;font-weight:600}
+.amt{font-family:var(--serif);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.mute{color:var(--mute)} .small{font-size:13px}
+
+.top{padding:calc(env(safe-area-inset-top) + 22px) 22px 6px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.top h1{font-family:var(--serif);font-size:28px;line-height:1.15}
+.top .sub{color:var(--mute);font-size:14px;margin-top:2px}
+.avatar{width:42px;height:42px;border-radius:50%;background:var(--accent);color:var(--onaccent);display:grid;place-items:center;font-family:var(--serif);font-size:18px;border:0;overflow:hidden;padding:0;flex:none}
+.avatar img{width:100%;height:100%;object-fit:cover;display:block}
+.role-pill{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;background:var(--card);border:1px solid var(--line);color:var(--accent);text-transform:uppercase;letter-spacing:.03em}
+.role-pill.op{color:var(--gold);background:var(--gold-bg);border-color:transparent}
+.sandbox-bar{background:var(--gold);color:#fff;text-align:center;font-size:12px;font-weight:700;padding:calc(env(safe-area-inset-top) + 6px) 12px 6px;display:flex;justify-content:space-between;align-items:center}
+.sandbox-bar button{background:rgba(0,0,0,.25);border:0;color:#fff;border-radius:99px;padding:2px 10px;font-size:11px}
+
+.hero{margin:14px 16px 0;background:var(--hero);color:#fff;border-radius:26px;padding:22px 22px 20px}
+.hero .lbl{font-size:14px;opacity:.82}
+.hero .big{font-family:var(--serif);font-size:44px;line-height:1.1;margin:4px 0 14px;font-variant-numeric:tabular-nums}
+.toggle{display:flex;align-items:center;justify-content:space-between;gap:12px;background:rgba(255,255,255,.14);border-radius:14px;padding:10px 12px;font-size:14px}
+.sw{width:46px;height:28px;border-radius:99px;background:rgba(255,255,255,.35);border:0;position:relative;flex:none;transition:background .2s}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:transform .2s}
+.sw[aria-checked="true"]{background:#fff}
+.sw[aria-checked="true"]::after{transform:translateX(18px);background:var(--accent)}
+.sw.dk{background:var(--line)}
+.sw.dk::after{background:#fff}
+.sw.dk[aria-checked="true"]{background:var(--accent)}
+.sw.dk[aria-checked="true"]::after{background:var(--onaccent)}
+
+.sec{margin:22px 16px 0}
+.sec h2{font-family:var(--serif);font-size:20px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:baseline}
+.sec h2 button{background:none;border:0;color:var(--accent);font:600 14px var(--sans);padding:4px 0}
+.card{background:var(--card);border-radius:20px;padding:16px;border:1px solid var(--line)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat .k{color:var(--mute);font-size:13px}
+.stat .v{font-family:var(--serif);font-size:23px;margin-top:2px;font-variant-numeric:tabular-nums}
+.stat .v.due{color:var(--due)} .stat .v.ok{color:var(--ok)}
+
+.bar{display:flex;height:12px;border-radius:99px;overflow:hidden;background:var(--line);margin:12px 0}
+.bar i{display:block;height:100%}
+.legend{display:grid;gap:8px}
+.legend div{display:flex;align-items:center;justify-content:space-between;font-size:14px}
+.legend span.dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:8px}
+
+.row{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--line);width:100%;background:none;border-left:0;border-right:0;border-top:0;text-align:left}
+.row:last-child{border-bottom:0}
+.row .id{font-family:var(--serif);font-size:15px;width:62px;flex:none;color:var(--mute)}
+.row .mid{flex:1;min-width:0}
+.row .mid b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .mid span{font-size:13px;color:var(--mute)}
+.row .end{text-align:right;flex:none}
+.row .end .amt{font-size:17px;display:block}
+.badge{display:inline-block;font-size:12px;font-weight:600;padding:2px 9px;border-radius:99px;margin-top:3px}
+.b-paid{background:var(--ok-bg);color:var(--ok)} .b-part{background:var(--gold-bg);color:var(--gold)} .b-due{background:var(--due-bg);color:var(--due)}
+
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 16px 4px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{border:1px solid var(--line);background:var(--card);border-radius:99px;padding:8px 16px;font-size:14px;white-space:nowrap}
+.chip[aria-pressed="true"]{background:var(--accent);color:var(--onaccent);border-color:var(--accent)}
+.chip.go{background:var(--accent);color:var(--onaccent);border-color:var(--accent);font-weight:600}
+
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{font-weight:600;color:var(--mute);font-size:13px;text-align:right;padding:0 0 10px}
+th:first-child,td:first-child{text-align:left}
+td{padding:13px 0;border-top:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums}
+td:first-child{font-weight:600;max-width:112px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+tr.clk{cursor:pointer}
+td.left-due{color:var(--due);font-weight:600} td.left-ok{color:var(--ok)}
+tfoot td{font-weight:700;border-top:2px solid var(--line)}
+
+.tabs{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(440px,100%);background:var(--card);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);align-items:center;padding:8px 6px calc(env(safe-area-inset-bottom) + 8px);z-index:20}
+.tab{background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:12px;color:var(--mute);padding:6px 0}
+.tab[aria-current="page"]{color:var(--accent);font-weight:700}
+.tab svg{width:24px;height:24px}
+.fab{width:58px;height:58px;border-radius:50%;background:var(--accent);color:var(--onaccent);border:0;display:grid;place-items:center;margin:-30px auto 0;box-shadow:0 8px 20px rgba(11,18,14,.35)}
+.fab svg{width:26px;height:26px}
+
+.scrim{position:fixed;inset:0;background:rgba(10,14,35,.55);z-index:40;display:none}
+.scrim.on{display:block}
+.sheet{position:fixed;bottom:0;left:50%;transform:translate(-50%,100%);width:min(440px,100%);max-height:92vh;max-height:92dvh;overflow:auto;background:var(--bg);border-radius:26px 26px 0 0;padding:10px 20px calc(env(safe-area-inset-bottom) + 24px);z-index:50;transition:transform .25s ease;visibility:hidden}
+.sheet.on{transform:translate(-50%,0);visibility:visible}
+.grab{width:42px;height:5px;border-radius:9px;background:var(--line);margin:0 auto 14px}
+.sheet h2{font-family:var(--serif);font-size:24px;margin-bottom:4px}
+@media (prefers-reduced-motion: reduce){.sheet,.toast{transition:none}.sw,.sw::after{transition:none}}
+
+label.f{display:block;font-size:14px;font-weight:600;margin:14px 0 6px}
+.in{width:100%;background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:13px 14px}
+.in:focus{border-color:var(--accent);outline:none}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.seg.c2{grid-template-columns:1fr 1fr}
+.seg button{background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:12px 4px;font-weight:600;font-size:14px}
+.seg button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent);color:var(--onaccent)}
+.btn{width:100%;border:0;border-radius:16px;padding:15px;background:var(--accent);color:var(--onaccent);font-weight:700;font-size:16px;margin-top:20px}
+.btn:disabled{opacity:.6}
+.btn.alt{background:var(--card);color:var(--text);border:1.5px solid var(--line);margin-top:10px}
+.btn.danger{color:var(--due)}
+.btnlink{display:flex;align-items:center;justify-content:center;background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:12px;font-weight:600;text-decoration:none;color:var(--text)}
+.err{color:var(--due);font-size:13px;margin-top:8px;min-height:18px}
+.note{background:var(--gold-bg);color:var(--gold);border-radius:14px;padding:11px 13px;font-size:13px;margin-top:12px}
+.steps{margin:8px 0 0;padding-left:20px;font-size:14px}
+.steps li{margin:6px 0}
+code.o{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:2px 7px;font-size:13px;word-break:break-all}
+
+.auth{padding:calc(env(safe-area-inset-top) + 28px) 24px 40px;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
+.langsw{display:flex;gap:6px;justify-content:flex-end;margin-bottom:22px;align-items:center}
+.langsw select{background:var(--card);border:1px solid var(--line);border-radius:99px;padding:6px 12px;font-size:13px;font-weight:600}
+.brand{font-family:var(--serif);font-size:46px;line-height:1;letter-spacing:-.02em}
+.tag{color:var(--mute);margin:10px 0 28px;max-width:28ch}
+.ledger-lines{height:46px;margin:0 0 26px;background:repeating-linear-gradient(to bottom,var(--line) 0 1px,transparent 1px 11px);border-radius:4px}
+.gbtn{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:15px;font-weight:700;font-size:16px}
+.linkbtn{background:none;border:0;color:var(--accent);font-weight:700;padding:0;text-decoration:underline;font-size:inherit}
+.or{display:flex;align-items:center;gap:12px;color:var(--mute);font-size:13px;margin:16px 0}
+.or::before,.or::after{content:"";flex:1;height:1px;background:var(--line)}
+.code{letter-spacing:.6em;text-align:center;font-family:var(--serif);font-size:26px}
+.legal{margin-top:auto;padding-top:28px;font-size:13px;color:var(--mute);text-align:center;display:grid;gap:10px}
+.legal button{background:none;border:0;color:var(--accent);font-weight:600;padding:0;text-decoration:underline;font-size:13px}
+
+.toast{position:fixed;top:calc(env(safe-area-inset-top) + 12px);left:50%;transform:translate(-50%,-180%);width:min(408px,calc(100% - 24px));background:var(--ink);color:var(--onaccent);border-radius:18px;padding:14px 16px;z-index:80;transition:transform .3s ease;display:flex;gap:12px;align-items:flex-start;box-shadow:0 10px 28px rgba(0,0,0,.22)}
+.toast.on{transform:translate(-50%,0)}
+.toast b{display:block}
+.empty{text-align:center;color:var(--mute);padding:26px 10px}
+.empty b{display:block;color:var(--text);font-family:var(--serif);font-size:18px;margin-bottom:4px}
+.pays{margin:10px 0 0;padding:0;list-style:none}
+.pays li{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--line);font-size:14px}
+.pays li:last-child{border-bottom:0}
+.xbtn{background:none;border:0;color:var(--due);padding:4px 8px;font-size:18px;line-height:1}
+.kv{display:flex;justify-content:space-between;padding:8px 0;font-size:15px;gap:12px}
+.link{color:var(--accent);font-weight:600;text-decoration:none}
+.who{display:flex;align-items:center;gap:14px}
+.who .avatar{width:52px;height:52px;font-size:22px}
+.who b{display:block}
+.searchbox{margin:12px 16px 0}
+.quick{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 16px 0}
+.quick button{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px 2px 10px;display:flex;flex-direction:column;align-items:center;gap:5px;font-weight:700;font-size:12px}
+.quick button svg{width:23px;height:23px;color:var(--accent)}
+
+/* Shopkeeper Super-Features Styling */
+.line-items{display:grid;gap:8px;margin-top:8px}
+.line-row{display:grid;grid-template-columns:1fr 64px 84px 32px;gap:6px;align-items:center}
+.line-row input{padding:10px 8px;border-radius:11px;font-size:14px}
+.calc-bar{display:flex;justify-content:space-between;align-items:center;background:var(--ok-bg);color:var(--ok);padding:10px 14px;border-radius:14px;margin-top:10px;font-weight:600;font-size:14px}
+.stock-pill{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:99px;font-size:12px;font-weight:600;background:var(--bg);border:1px solid var(--line)}
+.stock-low{background:var(--due-bg);color:var(--due);border-color:transparent}
+.banner{margin:12px 16px 0;background:var(--gold-bg);color:var(--gold);border-radius:16px;padding:12px 14px;font-size:13px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.banner button{background:var(--gold);color:#fff;border:0;border-radius:99px;padding:6px 12px;font-weight:600;font-size:12px;white-space:nowrap}
+.banner.alert-red{background:var(--due-bg);color:var(--due)}
+.banner.alert-red button{background:var(--due)}
+
+/* Command Palette */
+.cmd-modal{position:fixed;inset:0;background:rgba(10,14,35,.65);z-index:90;display:none;align-items:flex-start;justify-content:center;padding-top:12vh}
+.cmd-modal.on{display:flex}
+.cmd-box{width:min(410px,calc(100% - 24px));background:var(--card);border:1px solid var(--line);border-radius:20px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.4)}
+.cmd-box input{width:100%;border:0;border-bottom:1px solid var(--line);padding:16px;background:transparent;font-size:16px}
+.cmd-box input:focus{outline:none}
+.cmd-list{max-height:50vh;overflow:auto;padding:8px}
+.cmd-item{display:flex;justify-content:space-between;align-items:center;width:100%;padding:12px;border:0;background:none;border-radius:12px;text-align:left}
+.cmd-item:hover,.cmd-item:focus{background:var(--bg)}
+.cmd-kbd{font-size:11px;color:var(--mute);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:2px 6px}
+
+/* Hash & Audit Log */
+.hash-tag{font-family:monospace;font-size:11px;color:var(--mute);background:var(--bg);padding:2px 6px;border-radius:6px}
+.audit-item{padding:10px 0;border-bottom:1px solid var(--line);font-size:13px}
+.audit-item:last-child{border-bottom:0}
+
+/* receipt: always looks like paper */
+.receipt{background:#fff;color:#14182e;border-radius:18px;padding:22px 20px;margin-top:14px;border:1px solid #dcdfea}
+.receipt .r-shop{font-family:var(--serif);font-size:22px;font-weight:700;text-align:center}
+.receipt .r-sub{text-align:center;font-size:13px;color:#555d7a}
+.receipt .r-title{text-align:center;font-weight:700;margin:14px 0 10px;padding:8px 0;border-top:1px dashed #b9bed2;border-bottom:1px dashed #b9bed2}
+.receipt .r-line{display:flex;justify-content:space-between;gap:12px;padding:5px 0;font-size:15px}
+.receipt .r-line.big{font-weight:700;font-size:17px;border-top:1px solid #14182e;margin-top:8px;padding-top:10px}
+.receipt .r-pays{font-size:13px;color:#555d7a;margin-top:8px}
+.receipt .r-thanks{text-align:center;margin-top:16px;font-size:14px;color:#555d7a}
+@media print{
+  html,body{background:#fff!important}
+  #app,.scrim,.toast,.cmd-modal{display:none!important}
+  .sheet{position:static!important;transform:none!important;visibility:visible!important;max-height:none!important;overflow:visible!important;background:#fff!important;width:100%!important;padding:0!important;border-radius:0!important}
+  .noprint,.grab{display:none!important}
+  .receipt{border:0!important;margin:0!important}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="scrim" id="scrim" data-act="closeSheet"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="cmd-modal" id="cmd-modal">
+  <div class="cmd-box">
+    <input id="cmd-in" placeholder="Type command or search (e.g. Sale, Audit, Day Close)..." autocomplete="off">
+    <div class="cmd-list" id="cmd-list"></div>
+  </div>
+</div>
+
+<script>
+/* =====================================================================
+   HISAB PRO — Enterprise Offline-First Ledger, Reconciliation & POS
+   ===================================================================== */
+const GOOGLE_CLIENT_ID = '171008199392-stjo57rs9kmivf3c8m3s0q90coubf0md.apps.googleusercontent.com';
+const EMAILJS = {
+  service: 'service_7hhi8ao',
+  template: 'template_ch3d3zy',
+  key: 'lvADOLyyHB8bsU6AX',
+  reminderTemplate: 'template_ch3d3zy'
+};
+const OVERDUE_DAYS = 7;
+
+/* ---------- Fixed-Point Integer Math Engine (Zero Floating-Point Drift) ---------- */
+const toPaisa = n => Math.round((Number(n) || 0) * 100);
+const fromPaisa = p => Math.round(Number(p) || 0) / 100;
+const addMoney = (a, b) => fromPaisa(toPaisa(a) + toPaisa(b));
+const subMoney = (a, b) => fromPaisa(toPaisa(a) - toPaisa(b));
+const mulMoney = (a, qty) => fromPaisa(Math.round(toPaisa(a) * (Number(qty) || 0)));
+
+/* ---------- Cryptographic Hash Utility (SHA-256 / Deterministic Fallback) ---------- */
+async function sha256Hex(str){
+  try{
+    if(window.crypto && crypto.subtle){
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+    }
+  }catch(e){}
+  let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+  for(let i = 0; i < str.length; i++){
+    const ch = str.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return (h2 >>> 0).toString(16).padStart(8,'0') + (h1 >>> 0).toString(16).padStart(8,'0');
+}
+
+/* ---------- Multi-Language Support ---------- */
+const LANG_NAMES = {
+  en: 'English', ne: 'नेपाली (Nepali)', hi: 'हिन्दी (Hindi)', es: 'Español (Spanish)',
+  fr: 'Français (French)', ar: 'العربية (Arabic)', bn: 'বাংলা (Bengali)', zh: '中文 (Chinese)',
+  pt: 'Português (Portuguese)', ru: 'Русский (Russian)', ja: '日本語 (Japanese)',
+  de: 'Deutsch (German)', ko: '한국어 (Korean)', id: 'Bahasa Indonesia', ur: 'اردو (Urdu)'
+};
+
+const T = {
+en:{
+ home:'Home', orders:'Orders', customers:'Customers', settings:'Settings', recordSale:'Record a sale',
+ tagline:'Every sale, cash or credit, in one cryptographically verified ledger.', login:'Log in', signup:'Sign up', setupGoogle:'Set up Google sign-in',
+ orEmail:'or use e-mail', emailAddr:'E-mail address', sendCode:'Send verification code', enterCode:'Enter your code',
+ codeMade:'A 6-digit code was made for', codeSent:'We sent a 6-digit code to', validFor:'It works for 10 minutes.',
+ verCode:'Verification code', verifyLogin:'Verify and log in', verifySignup:'Verify and create account', newCode:'Send a new code', otherEmail:'Use a different e-mail',
+ demoNote:'E-mail sending is not connected yet, so your code is shown here: {code}.',
+ agree:'By continuing you agree to the {terms} and {policies}.', signinSetup:'Sign-in setup', sending:'Sending…', contEmail:'Continue with Email', contGoogle:'Continue with Google', or:'OR', createAcc:'Create your Hisab account', loginAcc:'Log in to Hisab', haveAcc:'Already have an account?', noAcc:'New to Hisab?', back:'Back', errGPopup:'The Google window was blocked. Allow pop-ups for this site and try again.',
+ errEmail:'Enter a valid e-mail address, like name@shop.com.', errExpired:'This code has expired. Send a new one.', errCode6:'Enter the 6-digit code.',
+ errTooMany:'Too many wrong codes. Start again to get a new one.', errWrong:'That code is not right. {n} left.',
+ errGNet:'Could not reach Google. Check your internet connection and try again.', errGAud:'This sign-in was not issued for this app.',
+ errGExp:'This sign-in expired. Please try again.', errGUnv:'Google says this e-mail is not verified.', errGFail:'Google sign-in did not complete. Please try again.',
+ errSend:'The e-mail could not be sent{why}.', codeSentT:'Code sent', codeSentTxt:'Check {email} (and your spam folder).',
+ hello:'Namaste, {name}', totalIncl:'Total sales, including credit', totalExcl:'Total received, excluding credit', inclCredit:'Include credit in total',
+ itemsSold:'Items sold', earned:'Earned', stillToCome:'Still to come', allTime:'all customers, all time', fromCust1:'from 1 customer', fromCustN:'from {n} customers',
+ whereMoney:'Where the money is', recvCash:'Received in cash', recvEsewa:'Received by eSewa', recvKhalti:'Received by Khalti', recvOther:'Received by other e-cash',
+ latest:'Latest orders', seeAll:'See all', noOrders:'No orders yet', noOrdersHint:'Record your first sale to see it here.', pToday:'Today', pWeek:'7 days', pMonth:'This month', pAll:'All time',
+ ordersTitle:'Orders', recordedN:'{n} recorded, newest first', searchPh:'Search customer, item or ORD number',
+ fAll:'All', fDue:'Unpaid', fPart:'Partly paid', fPaid:'Paid', noneHere:'No orders here yet.', noMatch:'Nothing matches your search.',
+ sPaid:'Paid', sPart:'Partly paid', sDue:'Unpaid',
+ m_cash:'Cash', m_esewa:'eSewa', m_khalti:'Khalti', m_ecash:'Other e-cash', m_credit:'Credit',
+ custTitle:'Customers', tapName:'Tap a name for their orders', colCustomer:'Customer', colBought:'Bought', colPaid:'Paid', colLeft:'Left', clear:'Clear', total:'Total', amountsRs:'Amounts in rupees.',
+ noCust:'No customers yet', noCustHint:'Customers appear here after you record a sale.',
+ settingsTitle:'Settings', signedWith:'Signed in with {via}', dailyReminder:'Daily reminder & Email alerts', phoneNotif:'Phone notifications',
+ nOn:'On', nDefault:'Not allowed yet', nDenied:"Blocked. Allow it in your phone's site settings.", nUnsup:'Not supported in this browser', allow:'Allow',
+ soundVib:'Sound and vibration', soundHint:'Plays a chime when a reminder is sent', remindEvery:'Remind me every day', remindHint:'A summary of money still to come',
+ remindTime:'Reminder time', testRemind:'Send a test reminder now',
+ pushNote:'Reminders are e-mailed via EmailJS whenever the app is open, and when you close the shop (Day Close), an automatic offline-safe summary e-mail is dispatched immediately.',
+ shopDetails:'Shop details', shopHint:'Shown at the top of receipts', editShop:'Edit shop details', shopName:'Shop name', shopPhone:'Shop phone', shopAddr:'Address', shopPan:'PAN / VAT No. (Optional)', saveShop:'Save shop details', shopSaved:'Shop details saved',
+ language:'Language', backup:'Backup and export', exportOrders:'Download orders (Excel / CSV)', exportDues:'Download customer dues (Excel / CSV)',
+ backupFile:'Save a backup file', restoreFile:'Restore from a backup', backupHint:'Your records are saved locally with automatic daily snapshots.',
+ account:'Account', ordersRecorded:'Orders recorded', terms:'Terms & Conditions', policies:'Policies', logout:'Log out',
+ recordSaleT:'Record a sale', savedAs:'This will be saved as {id}', custName:'Customer name', whoBought:'Who bought it?', item:'Item', whatSold:'What was sold?',
+ totalPrice:'Total price (Rs)', howPaid:'How was it paid?', custPhone:'Customer phone number', paidSoFar:'Paid so far (Rs, optional)', advanceBy:'Advance paid by', saveSale:'Save sale',
+ errName:'Enter the customer name.', errItem:'Enter what was sold.', errAmt:'Enter a total price above zero.', errPhone:"Enter the customer's phone number so you can reach them about the credit.", errAdv:'Paid so far must be between zero and the total price.',
+ saleSaved:'{id} saved', toComeFrom:'{amt} to come from {name}.', recvBy:'{amt} received by {m}.',
+ itemL:'Item', totalL:'Total price', paidTill:'Paid till now', leftToPay:'Left to pay', nothing:'Nothing', phoneL:'Phone', payments:'Payments', recordPay:'Record a payment',
+ amtRecv:'Amount received (Rs)', recvAs:'Received as', savePay:'Save payment', close:'Close', receipt:'Receipt', editOrder:'Edit order', deleteOrder:'Delete order',
+ errPayAmt:'Enter the amount received.', errPayMax:'Only {amt} is left on this order.', payToast:'Payment saved', payToastTxt:'{amt} from {name}. {rest}', stillLeft:'{amt} still left.', fullyPaid:'{id} is fully paid.',
+ editT:'Edit {id}', saveChanges:'Save changes', cancel:'Cancel', errTotalLess:'Total cannot be less than the {amt} already paid. Remove a payment first.', updated:'Order updated',
+ delT:'Delete {id}?', delTxt:'This removes the order and all its payments for good.', delBtn:'Delete', deleted:'{id} deleted',
+ delPayT:'Remove this payment?', delPayTxt:'{amt} will be removed from {id}.', remove:'Remove', payRemoved:'Payment removed',
+ bought:'Bought', paid:'Paid', allClear:'All clear', ordersL:'Orders', noPhone:'No phone number saved', remindCust:'Remind this customer', sms:'SMS', whatsapp:'WhatsApp',
+ dueMsg:'Namaste {name}, a friendly reminder from {shop}: {amt} is still due. Thank you!',
+ receiptT:'Receipt', rDate:'Date', rCustomer:'Customer', rItem:'Item', rTotal:'Total', rPaid:'Paid', rBalance:'Balance due', thanks:'Thank you!', share:'Share', print:'Print / Save as PDF', copied:'Receipt copied', copiedTxt:'Paste it into any chat or message.',
+ backupSaved:'Backup saved', backupSavedTxt:'Keep the file somewhere safe.', exported:'File downloaded', restoreT:'Restore this backup?', restoreTxt:'This replaces the {n} orders on this phone with the {m} orders in the backup file.', restoreBtn:'Replace my data', restored:'Backup restored', badFile:'That file is not a Hisab backup.',
+ neverMiss:'Never miss a payment', neverMissTxt:'Hisab can send a daily reminder with a sound, showing how much money is still to come.', allowNS:'Allow notifications and sound', notNow:'Not now',
+ getReminder:'Get your daily reminder', getReminderTxt:'Allow notifications and sound so dues reach your phone.', blocked:'Notifications are blocked', blockedTxt:"Allow them in your phone's site settings, then reopen Hisab.",
+ nsT:'Notifications not supported', nsTxt:'Open Hisab in Chrome or Safari.', onT:'Notifications are on', onTxt:'You will hear a chime with each reminder.', onBody:'Your daily reminder will arrive here with a sound.',
+ dailyRem:'Hisab daily reminder', remNone:"Record today's sales in Hisab.", remDue:'{amt} still to come from {n} customer(s).', remClear:'Every customer has paid. Nothing is due.', remTimeSet:'Reminder time set', remTimeTxt:'You will be reminded every day at {time}.',
+ setupSaved:'Setup saved', gReady:'Google sign-in is ready.', gNotReady:'Google sign-in is not set up yet.',
+ termsBody:'<p style="margin-top:0"><b>Your records.</b> The sales, customers and payments you enter are yours.</p><p><b>Customer details.</b> Only save phone numbers of customers who know you are keeping their record.</p><p style="margin-bottom:0"><b>No financial advice.</b> Hisab keeps your books.</p>',
+ policyBody:'<p style="margin-top:0"><b>Privacy.</b> Your name, e-mail and photo are used only to sign you in.</p><p><b>Data.</b> Orders and customer details are saved locally on this device.</p>',
+ legalNote:'Standard terms for Hisab Pro.', gotIt:'Got it', last7:'Last 7 days', last7Txt:'Sold in the last 7 days: {amt}', searchCust:'Search customer name or phone', contAs:'Continue as {name}', qSale:'New sale', qCollect:'Collect', qExpense:'Expense', qStock:'Stock', collectT:'Who paid you?', collectHint:'Tap a customer, then enter what they paid.', collectNone:'Nobody owes you right now.', saveAdd:'Save and add another', errPayMaxC:'Only {amt} is left to pay for this customer.',
+ today:'Today', ageD:'{n}d', fOver:'Overdue', overdueAmt:'Overdue: {amt}', quickAdd:'Quick add from recent sales', repeatSale:'Repeat sale',
+ receivePay:'Receive payment', receivePayHint:'Applied to the oldest unpaid orders first.', custPayTxt:'{amt} from {name}, applied to the oldest orders first.',
+ expenses:'Expenses', expensesP:'Spent', netL:'Net (earned − spent)', addExpense:'Add expense', saveExpense:'Save expense', expNote:'What was it for?', expAmt:'Amount (Rs)', expSaved:'Expense saved', expPeriod:'Spent in this period: {amt}', noExp:'No expenses yet', errExpNote:'Enter what the money was spent on.', errExpAmt:'Enter an amount above zero.', expDeleted:'Expense removed',
+ exp_Stock:'Stock', exp_Rent:'Rent', exp_Transport:'Transport', exp_Salary:'Salary', exp_Electricity:'Electricity',
+ sendTo:'Send reminder to', sendToHint:"Delivers directly to your inbox even if your phone is turned off.", remEmailSaved:'Reminder e-mail saved',
+ remSent:'Reminder e-mailed', remSentTxt:'Sent to {email}. Check your inbox.', remFail:'Reminder e-mail failed', remNoTpl:'Reminder e-mail is not set up', remNoTplTxt:'Create the reminder template in EmailJS.',
+ remEmailSubject:'Hisab: {amt} to collect', remEmailSubjectClear:'Hisab: everyone has paid', remEmailHello:'Namaste {name},', remEmailIntro:'Here is your Hisab summary for {date}.', remEmailToCollect:'To collect: {amt} from {n} customer(s)', remEmailOverdue:'Overdue ({d}+ days): {amt}', remEmailToday:'Today: sold {sold}, received {rec}', remEmailTop:'Biggest dues', remEmailClear:'Everyone has paid. Nothing to collect.', remEmailFoot:'Sent by Hisab Pro',
+ stockTitle:'Inventory & Products', addProduct:'Add product', prodName:'Product name', prodPrice:'Selling price (Rs)', prodCost:'Cost price (Rs, optional)', prodQty:'Stock qty', prodLow:'Low stock alert at', saveProd:'Save product', prodSaved:'Product saved', noStock:'No products in catalog yet', stockHint:'Add products to auto-fill prices and track stock automatically on sales.', lowStockBanner:'{n} item(s) running low on stock!', viewStock:'View stock',
+ multiItem:'Multi-item bill', singleItem:'Single item', addItemRow:'+ Add another item', qty:'Qty', rate:'Rate', discount:'Discount (Rs)', taxPct:'VAT / Tax (%)', changeDue:'Change to return', cashTendered:'Cash given by customer',
+ dayClose:'Day Close & Cash Tally', dayCloseHint:'Count cash in drawer, lock period & email end-of-day report', openingCash:'Opening cash in drawer', actualCash:'Actual cash counted', cashDiff:'Difference', sendEodEmail:'Close Day, Lock Period & Email', eodSent:'Day Closed, Period Locked & Report E-mailed!',
+ creditLimit:'Credit limit (Rs, optional)', creditWarn:'Exceeds customer credit limit of {lim}!', profitEst:'Est. Profit', autoBackup:'Auto-backup reminder', backupNow:'Backup Now',
+ walkIn:'Walk-in Customer', overdueNotify:'Email Overdue Alert Now', queueFlushed:'Offline queued emails sent ({n})',
+ reconcileEngine:'Statement Reconciliation', reconcileHint:'Import CSV bank/wallet statement for SHA-256 deduplicated & split-subset matching', uploadCsv:'Import Bank / Wallet CSV',
+ auditTrail:'Cryptographic Audit Trail', auditHint:'Tamper-evident SHA-256 chained log of every ledger event',
+ snapshots:'Point-in-Time Snapshots', snapshotsHint:'Automatic local recovery checkpoints with one-click rollback',
+ sandboxMode:'What-If Sandbox Mode', sandboxHint:'Test rules & edits safely without affecting your live ledger',
+ governance:'Governance & Access Control', roleSupervisor:'Supervisor (Full Access)', roleOperator:'Operator (Restricted)',
+ periodLockedMsg:'This date is locked by a completed Day Close. Unlock in Governance to edit.',
+ anomalyBanner:'⚠️ {n} anomaly alert(s) detected in ledger!', viewAnomalies:'Review Alerts'
+},
+ne:{
+ home:'गृह', orders:'अर्डर', customers:'ग्राहक', settings:'सेटिङ', recordSale:'बिक्री थप्नुहोस्',
+ tagline:'नगद वा उधारो, हरेक बिक्री सुरक्षित खातामा।', login:'लगइन', signup:'साइन अप', setupGoogle:'गुगल साइन-इन सेटअप गर्नुहोस्',
+ hello:'नमस्ते, {name}', totalIncl:'कुल बिक्री (उधारो सहित)', totalExcl:'कुल प्राप्त रकम (उधारो बाहेक)', inclCredit:'कुलमा उधारो समावेश गर्नुहोस्',
+ itemsSold:'बिक्री भएको सामान', earned:'कमाइ', stillToCome:'उठ्न बाँकी', allTime:'सबै ग्राहक, सबै समय', fromCust1:'१ ग्राहकबाट', fromCustN:'{n} ग्राहकबाट',
+ whereMoney:'पैसा कहाँ छ', recvCash:'नगदमा प्राप्त', recvEsewa:'eSewa बाट प्राप्त', recvKhalti:'Khalti बाट प्राप्त', recvOther:'अन्य ई-क्यासबाट प्राप्त',
+ latest:'पछिल्ला अर्डर', seeAll:'सबै हेर्नुहोस्', noOrders:'अहिलेसम्म अर्डर छैन', noOrdersHint:'पहिलो बिक्री थप्नुहोस्, यहाँ देखिन्छ।', pToday:'आज', pWeek:'७ दिन', pMonth:'यो महिना', pAll:'सबै समय',
+ ordersTitle:'अर्डर', custTitle:'ग्राहक', settingsTitle:'सेटिङ',
+ qSale:'नयाँ बिक्री', qCollect:'उठाउनुहोस्', qExpense:'खर्च', qStock:'स्टक',
+ stockTitle:'स्टक र सामान सूची', dayClose:'दिन बन्द र नगद हिसाब (Day Close)', walkIn:'नगद ग्राहक (Walk-in)',
+ reconcileEngine:'स्टेटमेन्ट मिलान (Reconciliation)', auditTrail:'सुरक्षित अडिट लग (Audit Trail)', snapshots:'ब्याकअप स्न्यापसट (Snapshots)', sandboxMode:'परीक्षण मोड (Sandbox)'
+}
+};
+
+let LANG = 'en';
+const t = (k, v) => {
+  const dict = T[LANG] || T.en;
+  const raw = dict[k] ?? T.en[k] ?? k;
+  return String(raw).replace(/\{(\w+)\}/g, (m, x) => (v && v[x] != null) ? v[x] : '');
+};
+
+function applyBrowserLanguage(code){
+  LANG = code;
+  Store.set('hisab:lang', code);
+  document.documentElement.dir = (code === 'ar' || code === 'ur') ? 'rtl' : 'ltr';
+  if(!T[code] && navigator.onLine){
+    if(!$('#gt-script')){
+      const d = document.createElement('div'); d.id = 'google_translate_element'; d.style.display = 'none'; document.body.appendChild(d);
+      window.googleTranslateElementInit = () => {
+        try{
+          new google.translate.TranslateElement({pageLanguage:'en', includedLanguages:Object.keys(LANG_NAMES).join(','), autoDisplay:false}, 'google_translate_element');
+          setTimeout(() => triggerGT(code), 600);
+        }catch(e){}
+      };
+      const s = document.createElement('script'); s.id = 'gt-script';
+      s.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+      s.onerror = () => {};
+      document.head.appendChild(s);
+    } else triggerGT(code);
+  } else triggerGT('en');
+}
+function triggerGT(code){
+  const sel = document.querySelector('.goog-te-combo');
+  if(sel){ sel.value = code; sel.dispatchEvent(new Event('change')); }
+}
+
+/* ---------- Helpers ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const rs = n => (LANG === 'ne' || LANG === 'hi' ? 'रु ' : 'Rs ') + Number(n || 0).toLocaleString('en-IN', {maximumFractionDigits: 2});
+const dshort = iso => new Date(iso).toLocaleDateString('en-GB', {day:'numeric', month:'short'});
+const dlong = iso => new Date(iso).toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'});
+const dkey = iso => new Date(iso).toISOString().slice(0,10);
+const daysAgo = n => { const d = new Date(); d.setDate(d.getDate() - n); return d.toISOString(); };
+const METHODS = ['cash','esewa','khalti','ecash'];
+const mLabel = k => t('m_' + k);
+
+const ic = {
+  home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>',
+  list:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg>',
+  users:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5"/><path d="M16 4.7a3.5 3.5 0 010 6.6M18 14.8c2 .6 3.2 2.3 3.5 5.2"/></svg>',
+  gear:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 01-4 0v-.1a1.7 1.7 0 00-1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 010-4h.1a1.7 1.7 0 001.5-1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 014 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 010 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg>',
+  plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  coin:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5C9.5 8.4 10.6 8 12 8s2.5.5 2.5 1.6c0 2.2-5 1.2-5 3.6 0 1.1 1.1 1.6 2.5 1.6s2.5-.5 2.5-1.6"/></svg>',
+  minus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="3"/><path d="M8 12.5h8"/></svg>',
+  box:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5v8l9 5 9-5V8z"/><path d="M3.3 7.3L12 12l8.7-4.7M12 22V12"/></svg>',
+  bell:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0112 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 003.4 0"/></svg>',
+  google:'<svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.6 5.9c4.4-4.1 7-10.1 7-17.6z"/><path fill="#FBBC05" d="M10.5 28.7a14.5 14.5 0 010-9.4l-7.9-6.1a24 24 0 000 21.6l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.6-5.9c-2.1 1.4-4.9 2.3-8.3 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg>'
+};
+
+/* ---------- Storage (LocalStorage + Memory Fallback for WebView) ---------- */
+const mem = {};
+const Store = {
+  get(k){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; }catch(e){ return mem[k] ?? null; } },
+  set(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){ mem[k] = v; } },
+  del(k){ try{ localStorage.removeItem(k); }catch(e){ delete mem[k]; } }
+};
+const cfg = () => Store.get('hisab:config') || {};
+const clientId = () => (GOOGLE_CLIENT_ID || cfg().gClientId || '').trim();
+
+/* ---------- App Icon + WebView/PWA-Safe Manifest ---------- */
+const ICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="#0B120E"/><g stroke="#fff" stroke-opacity=".18" stroke-width="3"><path d="M96 150h320M96 200h320M96 250h320M96 300h320M96 350h320M96 400h320"/></g><text x="256" y="338" text-anchor="middle" font-family="Georgia,serif" font-size="270" fill="#3DDC84">H</text></svg>';
+const ICON_URI = 'data:image/svg+xml,' + encodeURIComponent(ICON_SVG);
+(function(){
+  try{
+    const f = document.createElement('link'); f.rel = 'icon'; f.href = ICON_URI; document.head.appendChild(f);
+    const a = document.createElement('link'); a.rel = 'apple-touch-icon'; a.href = ICON_URI; document.head.appendChild(a);
+    if(/^https?:/.test(location.protocol)){
+      const baseUrl = location.href.split('#')[0].split('?')[0];
+      const m = {
+        name:'Hisab Pro',
+        short_name:'Hisab',
+        start_url:baseUrl,
+        scope:new URL('./', baseUrl).href,
+        display:'standalone',
+        background_color:'#EEF3EF',
+        theme_color:'#0B120E',
+        icons:[
+          {src:ICON_URI, sizes:'192x192', type:'image/svg+xml', purpose:'any maskable'},
+          {src:ICON_URI, sizes:'512x512', type:'image/svg+xml', purpose:'any maskable'}
+        ]
+      };
+      const l = document.createElement('link'); l.rel = 'manifest'; l.href = 'data:application/manifest+json,' + encodeURIComponent(JSON.stringify(m)); document.head.appendChild(l);
+    }
+  }catch(e){}
+})();
+
+/* ---------- Application State ---------- */
+const freshAuth = () => ({mode:'login', step:'start', email:(Store.get('hisab:last') || {}).email || '', err:'', code:'', exp:0, tries:0, demo:false});
+const state = {
+  user: null, auth: freshAuth(), tab:'home', filter:'all', q:'', cq:'', period:'all', includeCredit:true,
+  remind: {on:true, time:'20:00', lastFired:'', sound:true, email:'', lastBackup:''},
+  shop: {name:'', phone:'', address:'', pan:''},
+  orders: [], expenses: [], products: [], custMeta: {}, emailQueue: [],
+  auditLog: [],
+  ingestedHashes: [],
+  lockedDates: [],
+  snapshots: [],
+  role: 'supervisor',
+  pin: '',
+  sandbox: false,
+  liveBackup: null
+};
+let nextId = 1;
+const recalcNext = () => { nextId = state.orders.reduce((m,o) => Math.max(m, o.id), 0) + 1; };
+const dataKey = () => 'hisab:data:' + state.user.email.toLowerCase();
+const snapshotObj = () => ({
+  orders:state.orders, expenses:state.expenses, products:state.products,
+  custMeta:state.custMeta, remind:state.remind, includeCredit:state.includeCredit,
+  shop:state.shop, emailQueue:state.emailQueue, auditLog:state.auditLog,
+  ingestedHashes:state.ingestedHashes, lockedDates:state.lockedDates,
+  role:state.role, pin:state.pin
+});
+
+function save(){
+  if(!state.user || state.sandbox) return;
+  Store.set(dataKey(), snapshotObj());
+  Store.set('hisab:snapshots:' + state.user.email.toLowerCase(), state.snapshots.slice(0, 8));
+}
+
+/* ---------- Cryptographic Chained Audit Logger ---------- */
+async function logAudit(action, detail){
+  const prevHash = state.auditLog.length ? state.auditLog[0].hash : '0000000000000000';
+  const ts = new Date().toISOString();
+  const actor = `${state.user ? state.user.email : 'local'} (${state.role})`;
+  const payload = `${prevHash}|${ts}|${actor}|${action}|${detail}`;
+  const hash = await sha256Hex(payload);
+  state.auditLog.unshift({ts, actor, action, detail, prevHash, hash});
+  if(state.auditLog.length > 250) state.auditLog.length = 250;
+  save();
+}
+
+/* ---------- Automatic Point-in-Time Snapshot Engine ---------- */
+async function createSnapshot(label){
+  const raw = JSON.stringify(snapshotObj());
+  const checksum = (await sha256Hex(raw)).slice(0, 12);
+  state.snapshots.unshift({
+    id: Date.now(),
+    ts: new Date().toISOString(),
+    label: label || 'Auto Checkpoint',
+    ordersCount: state.orders.length,
+    checksum,
+    data: raw
+  });
+  if(state.snapshots.length > 8) state.snapshots.length = 8;
+  save();
+}
+
+function openAccount(user){
+  state.user = user;
+  const d = Store.get(dataKey());
+  state.orders = (d && d.orders) || [];
+  state.expenses = (d && d.expenses) || [];
+  state.products = (d && d.products) || [];
+  state.custMeta = (d && d.custMeta) || {};
+  state.emailQueue = (d && d.emailQueue) || [];
+  state.auditLog = (d && d.auditLog) || [];
+  state.ingestedHashes = (d && d.ingestedHashes) || [];
+  state.lockedDates = (d && d.lockedDates) || [];
+  state.role = (d && d.role) || 'supervisor';
+  state.pin = (d && d.pin) || '';
+  state.snapshots = Store.get('hisab:snapshots:' + user.email.toLowerCase()) || [];
+  state.remind = {on:true, time:'20:00', lastFired:'', sound:true, email:'', lastBackup:'', ...((d && d.remind) || {})};
+  state.shop = {name:'', phone:'', address:'', pan:'', ...((d && d.shop) || {})};
+  if(d && typeof d.includeCredit === 'boolean') state.includeCredit = d.includeCredit;
+  recalcNext();
+  const today = new Date().toDateString();
+  if(!state.snapshots.some(s => new Date(s.ts).toDateString() === today)){
+    createSnapshot('Daily Auto-Checkpoint');
+  }
+}
+
+/* ---------- Derived Calculations (Fixed-Point Safe) ---------- */
+const paidOf = o => fromPaisa(o.pay.reduce((a,p) => a + toPaisa(p.amt), 0));
+const leftOf = o => Math.max(0, subMoney(o.total, paidOf(o)));
+const statusOf = o => leftOf(o) === 0 ? 'paid' : (paidOf(o) > 0 ? 'part' : 'due');
+const badge = o => { const s = statusOf(o); return `<span class="badge b-${s==='paid'?'paid':s==='part'?'part':'due'}">${s==='paid'?t('sPaid'):s==='part'?t('sPart'):t('sDue')}</span>`; };
+const isDateLocked = iso => state.lockedDates.includes(dkey(iso));
+
+function totals(){
+  let soldP=0, recP=0;
+  state.orders.forEach(o => { soldP += toPaisa(o.total); recP += toPaisa(paidOf(o)); });
+  return {sold:fromPaisa(soldP), rec:fromPaisa(recP), left:fromPaisa(soldP - recP)};
+}
+function inPeriod(iso){
+  const p = state.period; if(p === 'all') return true;
+  const d = new Date(iso), n = new Date();
+  const start = new Date(n.getFullYear(), n.getMonth(), n.getDate());
+  if(p === 'today') return d >= start;
+  if(p === 'week'){ const s = new Date(start); s.setDate(s.getDate() - 6); return d >= s; }
+  if(p === 'month') return d.getFullYear() === n.getFullYear() && d.getMonth() === n.getMonth();
+  return true;
+}
+function periodTotals(){
+  let soldP=0, recP=0, profitP=0; const byP = {cash:0, esewa:0, khalti:0, ecash:0};
+  state.orders.forEach(o => {
+    if(inPeriod(o.date)){
+      soldP += toPaisa(o.total);
+      profitP += toPaisa(o.profit != null ? o.profit : o.total * 0.2);
+    }
+    o.pay.forEach(p => { if(inPeriod(p.date)){ const pp = toPaisa(p.amt); recP += pp; byP[p.m] = (byP[p.m] || 0) + pp; } });
+  });
+  return {
+    sold:fromPaisa(soldP), rec:fromPaisa(recP), profit:fromPaisa(profitP),
+    by:{cash:fromPaisa(byP.cash), esewa:fromPaisa(byP.esewa), khalti:fromPaisa(byP.khalti), ecash:fromPaisa(byP.ecash)},
+    left: totals().left
+  };
+}
+function customers(){
+  const map = new Map();
+  state.orders.forEach(o => {
+    const k = o.customer.trim().toLowerCase();
+    if(!map.has(k)) map.set(k, {name:o.customer.trim(), phone:o.phone, boughtP:0, paidP:0, orders:[]});
+    const c = map.get(k);
+    c.boughtP += toPaisa(o.total); c.paidP += toPaisa(paidOf(o)); c.orders.push(o);
+    if(o.phone) c.phone = o.phone;
+  });
+  return [...map.values()].map(c => ({
+    ...c, bought:fromPaisa(c.boughtP), paid:fromPaisa(c.paidP)
+  })).sort((a,b) => (b.boughtP - b.paidP) - (a.boughtP - a.paidP) || b.boughtP - a.boughtP);
+}
+const orderLabel = o => 'ORD-' + o.id;
+const ageDays = o => Math.max(0, Math.floor((Date.now() - new Date(o.date)) / 86400000));
+const isOverdue = o => leftOf(o) > 0 && ageDays(o) >= OVERDUE_DAYS;
+const periodExpenses = () => fromPaisa(state.expenses.filter(x => inPeriod(x.date)).reduce((a,x) => a + toPaisa(x.amt), 0));
+const shopName = () => state.shop.name || 'Hisab Pro';
+const kindLabel = k => k === 'credit' ? t('m_credit') : mLabel(k);
+const avatarInner = () => state.user.picture ? `<img src="${esc(state.user.picture)}" alt="" referrerpolicy="no-referrer">` : esc((state.user.name || '?')[0].toUpperCase());
+const segHtml = (id, act, items, sel, cls) => `<div class="seg ${cls||''}" id="${id}">${items.map(k => `<button type="button" data-act="${act}" data-k="${k}" aria-pressed="${k===sel}">${esc(k==='credit'?t('m_credit'):mLabel(k))}</button>`).join('')}</div>`;
+const lowStockItems = () => state.products.filter(p => Number(p.qty) <= Number(p.low || 5));
+
+/* ---------- Local Anomaly & Fraud Detection Engine ---------- */
+function detectAnomalies(){
+  const alerts = [];
+  const seenSig = new Map();
+  state.orders.forEach(o => {
+    const sig = `${o.customer.toLowerCase()}|${o.total}`;
+    const prev = seenSig.get(sig);
+    if(prev && Math.abs(new Date(o.date) - new Date(prev.date)) < 10 * 60 * 1000){
+      alerts.push({type:'Duplicate Entry', msg:`${orderLabel(o)} & ${orderLabel(prev)}: ${o.customer} for ${rs(o.total)} within 10 mins`});
+    }
+    seenSig.set(sig, o);
+    const hr = new Date(o.date).getHours();
+    if(hr >= 23 || hr < 5){
+      alerts.push({type:'After-Hours Entry', msg:`${orderLabel(o)} (${o.customer}, ${rs(o.total)}) recorded at ${hr}:00`});
+    }
+    if(o.kind === 'credit' && o.total >= 25000 && o.total % 1000 === 0){
+      alerts.push({type:'High-Value Round Credit', msg:`${orderLabel(o)}: ${rs(o.total)} credit to ${o.customer}`});
+    }
+  });
+  return alerts;
+}
+
+/* =====================================================================
+   SIGN-IN: Google (Google Identity Services) + E-mail OTP
+   ===================================================================== */
+let gsiPromise = null, gsiInitFor = '';
+function loadGSI(){
+  if(window.google && google.accounts && google.accounts.id) return Promise.resolve();
+  if(gsiPromise) return gsiPromise;
+  gsiPromise = new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = 'https://accounts.google.com/gsi/client'; s.async = true; s.defer = true;
+    s.onload = res; s.onerror = () => { gsiPromise = null; rej(new Error('gsi')); };
+    document.head.appendChild(s);
+  });
+  return gsiPromise;
+}
+let tokenClient = null, tokenClientFor = '';
+function startGoogle(hint){
+  const id = clientId();
+  if(!id){ sheetSetup(); return; }
+  const go = () => {
+    if(!tokenClient || tokenClientFor !== id){
+      tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id:id, scope:'openid email profile', callback:onGoogleToken,
+        error_callback: e => { if(e && e.type === 'popup_failed_to_open') setAuthErr(t('errGPopup')); }
+      });
+      tokenClientFor = id;
+    }
+    tokenClient.requestAccessToken(hint ? {hint, prompt:''} : {prompt:'select_account'});
+  };
+  if(window.google && google.accounts && google.accounts.oauth2) go();
+  else loadGSI().then(go).catch(() => setAuthErr(t('errGNet')));
+}
+async function onGoogleToken(r){
+  if(r.error){ setAuthErr(t('errGFail')); return; }
+  try{
+    const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {headers:{Authorization:'Bearer ' + r.access_token}});
+    if(!res.ok) throw new Error('userinfo');
+    const u = await res.json();
+    if(!u.email) throw new Error('noemail');
+    if(u.email_verified === false) return setAuthErr(t('errGUnv'));
+    login({name:u.name || u.email, email:u.email, picture:u.picture || '', via:'Google'});
+  }catch(e){ setAuthErr(t('errGFail')); }
+}
+function setAuthErr(m){ state.auth.err = m; const e = $('#autherr'); if(e) e.textContent = m; }
+function login(user){
+  Store.set('hisab:session', {user});
+  Store.set('hisab:last', {name:user.name, email:user.email, via:user.via, picture:user.picture || ''});
+  openAccount(user);
+  state.tab = 'home'; state.auth = freshAuth();
+  logAudit('LOGIN', `Signed in via ${user.via}`);
+  afterLogin();
+}
+function logout(){
+  if(state.sandbox) exitSandbox();
+  save();
+  try{ if(window.google && google.accounts) google.accounts.id.disableAutoSelect(); }catch(e){}
+  Store.del('hisab:session');
+  state.user = null; state.orders = []; state.expenses = []; state.products = []; state.auth = freshAuth();
+  closeSheet(); render();
+}
+
+const genCode = () => String(crypto.getRandomValues(new Uint32Array(1))[0] % 900000 + 100000);
+function emailCfg(){
+  const c = cfg().emailjs || {};
+  return {
+    service: EMAILJS.service || c.service || '',
+    template: EMAILJS.template || c.template || '',
+    key: EMAILJS.key || c.key || '',
+    reminderTemplate: EMAILJS.reminderTemplate || cfg().reminderTemplate || EMAILJS.template || c.template || ''
+  };
+}
+async function emailSend(templateId, params){
+  const e = emailCfg();
+  if(!(e.service && templateId && e.key)) throw new Error('E-mail sending is not set up');
+  const payload = {
+    service_id: e.service,
+    template_id: templateId,
+    user_id: e.key,
+    template_params: {
+      ...params,
+      email: params.to_email,
+      user_email: params.to_email,
+      reply_to: params.to_email,
+      from_name: shopName()
+    }
+  };
+  const r = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(payload)
+  });
+  if(!r.ok) throw new Error(await r.text());
+}
+async function sendEmailCode(email, code){
+  const message = `<p style="margin:0 0 8px">Your Hisab verification code is</p><p style="font-size:30px;letter-spacing:8px;margin:0 0 12px"><b>${code}</b></p><p style="margin:0;color:#666">It works for 10 minutes.</p>`;
+  await emailSend(emailCfg().template, {to_email:email, code, subject:'Your Hisab code', message});
+  return 'sent';
+}
+async function startEmailFlow(email, btn){
+  const a = state.auth;
+  a.email = email; a.code = genCode(); a.exp = Date.now() + 10*60*1000; a.tries = 0; a.err = '';
+  if(btn){ btn.disabled = true; btn.textContent = t('sending'); }
+  try{
+    await sendEmailCode(email, a.code);
+    a.demo = false; a.step = 'code'; render();
+    toast(t('codeSentT'), t('codeSentTxt', {email}));
+  }catch(e){
+    const why = String((e && e.message) || '').replace(/<[^>]*>/g, '').trim().slice(0, 140);
+    a.step = 'email'; a.err = t('errSend', {why: why ? ': ' + why : ''}); render();
+  }
+}
+
+/* ---------- Language Selector Component ---------- */
+const langSelectHtml = () => `<select aria-label="${t('language')}" data-change="langSelect">
+  ${Object.entries(LANG_NAMES).map(([code, name]) => `<option value="${code}" ${LANG===code?'selected':''}>${esc(name)}</option>`).join('')}
+</select>`;
+
+const langSwitch = () => `<div class="langsw" role="group" aria-label="Language">
+  <button class="chip" data-act="lang" data-l="en" aria-pressed="${LANG==='en'}">English</button>
+  <button class="chip" data-act="lang" data-l="ne" aria-pressed="${LANG==='ne'}">नेपाली</button>
+  ${langSelectHtml()}
+</div>`;
+
+/* ---------- Views ---------- */
+function viewAuth(){
+  const a = state.auth, signup = a.mode === 'signup';
+  let body;
+  if(a.step === 'start'){
+    const last = Store.get('hisab:last');
+    const lastCard = last && last.email ? `<button class="gbtn" data-act="continueLast" style="margin-bottom:14px;justify-content:flex-start;text-align:left"><span class="avatar" style="width:38px;height:38px;font-size:16px">${last.picture ? `<img src="${esc(last.picture)}" alt="" referrerpolicy="no-referrer">` : esc((last.name || '?')[0].toUpperCase())}</span><span style="min-width:0"><b style="display:block">${t('contAs',{name:esc((last.name || '').split(' ')[0] || last.email)})}</b><span class="small mute" style="word-break:break-all;font-weight:400">${esc(last.email)}</span></span></button>` : '';
+    body = `
+    <h2 class="serif" style="font-size:26px;margin-bottom:6px">${signup ? t('createAcc') : t('loginAcc')}</h2>
+    <p class="mute" style="margin:0 0 20px">${signup ? t('haveAcc') : t('noAcc')} <button class="linkbtn" data-act="authMode" data-m="${signup ? 'login' : 'signup'}">${signup ? t('login') : t('signup')}</button></p>
+    ${lastCard}
+    <button class="btn" style="margin-top:0" data-act="emailStep">${t('contEmail')}</button>
+    <div class="or">${t('or')}</div>
+    <button class="gbtn" data-act="google">${ic.google} ${t('contGoogle')}</button>
+    <div class="err" id="autherr">${esc(a.err)}</div>`;
+  } else if(a.step === 'email'){
+    body = `
+    <button class="linkbtn" data-act="backStart" style="text-decoration:none;margin-bottom:14px;text-align:left">‹ ${t('back')}</button>
+    <h2 class="serif" style="font-size:26px">${t('contEmail')}</h2>
+    <label class="f" for="em">${t('emailAddr')}</label>
+    <input class="in" id="em" type="email" inputmode="email" autocomplete="email" placeholder="you@shop.com" value="${esc(a.email)}">
+    <div class="err" id="autherr">${esc(a.err)}</div>
+    <button class="btn" style="margin-top:6px" data-act="sendCode">${t('sendCode')}</button>`;
+  } else {
+    body = `
+    <h2 class="serif" style="font-size:24px">${t('enterCode')}</h2>
+    <p class="mute" style="margin:6px 0 4px">${a.demo ? t('codeMade') : t('codeSent')} <b style="color:var(--text)">${esc(a.email)}</b>. ${t('validFor')}</p>
+    <label class="f" for="cd">${t('verCode')}</label>
+    <input class="in code" id="cd" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="••••••">
+    <div class="err" id="autherr">${esc(a.err)}</div>
+    <button class="btn" style="margin-top:6px" data-act="verify">${a.mode==='login' ? t('verifyLogin') : t('verifySignup')}</button>
+    <button class="btn alt" data-act="resend">${t('newCode')}</button>
+    <button class="btn alt" data-act="authBack">${t('otherEmail')}</button>`;
+  }
+  return `<div class="auth">
+    ${langSwitch()}
+    <div class="brand">Hisab Pro</div>
+    <p class="tag">${t('tagline')}</p>
+    <div class="ledger-lines" aria-hidden="true"></div>
+    ${body}
+    <div class="legal">
+      <div>${t('agree', {terms:`<button data-act="legal" data-d="terms">${t('terms')}</button>`, policies:`<button data-act="legal" data-d="policy">${t('policies')}</button>`})}</div>
+      <div><button data-act="setup">${t('signinSetup')}</button></div>
+    </div>
+  </div>`;
+}
+
+function periodChips(){
+  const c = (k,l) => `<button class="chip" data-act="period" data-p="${k}" aria-pressed="${state.period===k}">${l}</button>`;
+  return `<div class="chips" style="margin-top:14px">${c('today',t('pToday'))}${c('week',t('pWeek'))}${c('month',t('pMonth'))}${c('all',t('pAll'))}</div>`;
+}
+
+function viewHome(){
+  const p = periodTotals(), n = customers().filter(c => subMoney(c.bought, c.paid) > 0).length;
+  const big = state.includeCredit ? p.sold : p.rec;
+  const pname = {today:t('pToday'), week:t('pWeek'), month:t('pMonth'), all:t('pAll')}[state.period];
+  const inP = state.orders.filter(o => inPeriod(o.date)).length;
+  const lbl = (state.includeCredit ? t('totalIncl') : t('totalExcl')) + ' · ' + pname + ' · ' + inP + ' ' + t('orders').toLowerCase();
+  const first = (state.user.name || 'Friend').split(' ')[0];
+  const recent = [...state.orders].reverse().slice(0,4).map(orderRow).join('');
+  const od = fromPaisa(state.orders.filter(isOverdue).reduce((a,o) => a + toPaisa(leftOf(o)), 0));
+  const ex = periodExpenses(), net = subMoney(p.rec, ex);
+  const lowItems = lowStockItems();
+  const anomalies = detectAnomalies();
+  const days7 = [...Array(7)].map((_, i) => { const d = new Date(); d.setDate(d.getDate() - (6 - i)); return d; });
+  const sums7 = days7.map(d => fromPaisa(state.orders.filter(o => new Date(o.date).toDateString() === d.toDateString()).reduce((a, o) => a + toPaisa(o.total), 0)));
+  const max7 = Math.max(...sums7, 1), total7 = fromPaisa(sums7.reduce((a, v) => a + toPaisa(v), 0));
+  const segs = [['cash','--cash'],['esewa','--esewa'],['khalti','--khalti'],['ecash','--ecash']];
+  const denom = p.by.cash + p.by.esewa + p.by.khalti + p.by.ecash + p.left;
+  const pct = v => denom ? v / denom * 100 : 0;
+  const legendRows = segs.filter(([k]) => k === 'cash' || p.by[k] > 0).map(([k,col]) => `<div><span><span class="dot" style="background:var(${col})"></span>${t({cash:'recvCash',esewa:'recvEsewa',khalti:'recvKhalti',ecash:'recvOther'}[k])}</span><b class="amt">${rs(p.by[k])}</b></div>`).join('');
+
+  return `
+  <div class="top">
+    <div>
+      <h1>${t('hello',{name:esc(first)})}</h1>
+      <div class="sub">${new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})} · <button class="role-pill ${state.role==='operator'?'op':''}" data-act="openGov">${state.role}</button></div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="chip" style="padding:6px 10px;font-size:12px" data-act="openCmd" title="Command Palette (Ctrl+K)">⌘K</button>
+      <button class="avatar" data-act="goto" data-t="settings" aria-label="${t('settings')}">${avatarInner()}</button>
+    </div>
+  </div>
+  ${alertCard()}
+  ${anomalies.length ? `<div class="banner alert-red"><span><b>${t('anomalyBanner', {n:anomalies.length})}</b></span><button data-act="openAnomalies">${t('viewAnomalies')}</button></div>` : ''}
+  ${lowItems.length ? `<div class="banner"><span>⚠️ <b>${t('lowStockBanner', {n:lowItems.length})}</b></span><button data-act="openStock">${t('viewStock')}</button></div>` : ''}
+  ${periodChips()}
+  <div class="hero" style="margin-top:10px">
+    <div class="lbl">${lbl}</div>
+    <div class="big">${rs(big)}</div>
+    <div class="toggle"><span id="tl">${t('inclCredit')}</span>
+      <button class="sw" role="switch" aria-checked="${state.includeCredit}" aria-labelledby="tl" data-act="toggleCredit"></button></div>
+  </div>
+  <div class="quick">
+    <button data-act="newSale">${ic.plus}<span>${t('qSale')}</span></button>
+    <button data-act="collect">${ic.coin}<span>${t('qCollect')}</span></button>
+    <button data-act="addExp">${ic.minus}<span>${t('qExpense')}</span></button>
+    <button data-act="openStock">${ic.box}<span>${t('qStock')}</span></button>
+  </div>
+  <div class="sec"><div class="grid2">
+    <div class="card stat"><div class="k">${t('itemsSold')}</div><div class="v">${rs(p.sold)}</div></div>
+    <div class="card stat"><div class="k">${t('earned')}</div><div class="v ok">${rs(p.rec)}</div></div>
+  </div>
+  <div class="card stat" style="margin-top:10px;display:flex;justify-content:space-between;align-items:center;gap:10px">
+    <div><div class="k">${t('stillToCome')}</div><div class="v due">${rs(p.left)}</div></div>
+    <div class="small mute" style="text-align:right">${n === 1 ? t('fromCust1') : t('fromCustN',{n})}<br>${t('allTime')}${od > 0 ? `<br><span style="color:var(--due);font-weight:600">${t('overdueAmt',{amt:rs(od)})}</span>` : ''}</div>
+  </div></div>
+  <div class="sec"><h2>${t('whereMoney')}</h2>
+    <div class="card">
+      <div class="bar" role="img" aria-label="${t('whereMoney')}">
+        ${segs.map(([k,col]) => `<i style="width:${pct(p.by[k])}%;background:var(${col})"></i>`).join('')}<i style="width:${pct(p.left)}%;background:var(--due)"></i></div>
+      <div class="legend">${legendRows}
+        <div><span><span class="dot" style="background:var(--due)"></span>${t('stillToCome')}</span><b class="amt">${rs(p.left)}</b></div>
+      </div></div></div>
+  <div class="sec"><h2>${t('last7')}</h2><div class="card">
+    <div style="display:flex;align-items:flex-end;gap:8px;height:110px" role="img" aria-label="${t('last7')}">${sums7.map((v, i) => `<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:4px"><div title="${rs(v)}" style="width:100%;height:${Math.max(4, v / max7 * 80)}px;background:var(--accent);border-radius:6px;opacity:${v ? 1 : .25}"></div><span class="small mute">${days7[i].toLocaleDateString('en-GB', {weekday:'narrow'})}</span></div>`).join('')}</div>
+    <div class="small mute" style="margin-top:8px">${t('last7Txt', {amt:rs(total7)})}</div></div></div>
+  <div class="sec"><h2>${t('expenses')} <button data-act="expList">${t('seeAll')}</button></h2>
+    <div class="card"><div class="grid2">
+      <div class="stat"><div class="k">${t('expensesP')}</div><div class="v">${rs(ex)}</div></div>
+      <div class="stat"><div class="k">${t('netL')}</div><div class="v ${net >= 0 ? 'ok' : 'due'}">${rs(net)}</div></div>
+    </div>
+    <div class="seg c2" style="margin-top:12px">
+      <button data-act="addExp">${t('addExpense')}</button>
+      <button data-act="dayClose">${t('dayClose').split('&')[0].trim()}</button>
+    </div></div></div>
+  <div class="sec"><h2>${t('latest')} ${state.orders.length ? `<button data-act="goto" data-t="orders">${t('seeAll')}</button>` : ''}</h2>
+    <div class="card" style="padding:4px 16px">${recent || `<div class="empty"><b>${t('noOrders')}</b>${t('noOrdersHint')}<div style="display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap"><button class="chip go" data-act="newSale">${t('recordSale')}</button></div></div>`}</div></div>`;
+}
+
+function orderRow(o){
+  const age = leftOf(o) > 0 ? ` · <span style="color:${isOverdue(o) ? 'var(--due)' : 'inherit'}">${ageDays(o) === 0 ? t('today') : t('ageD',{n:ageDays(o)})}</span>` : '';
+  const lockIcon = isDateLocked(o.date) ? ' 🔒' : '';
+  return `<button class="row" data-act="openOrder" data-id="${o.id}">
+    <span class="id">${orderLabel(o)}${lockIcon}</span>
+    <span class="mid"><b>${esc(o.customer)}</b><span>${esc(o.item)} · ${esc(kindLabel(o.kind))}${age}</span></span>
+    <span class="end"><span class="amt">${rs(o.total)}</span>${badge(o)}</span></button>`;
+}
+
+function ordersListHtml(){
+  const f = state.filter, q = state.q.trim().toLowerCase();
+  const list = [...state.orders].reverse().filter(o => (f==='all' || (f==='over' ? isOverdue(o) : statusOf(o)===f)) &&
+    (!q || o.customer.toLowerCase().includes(q) || o.item.toLowerCase().includes(q) || orderLabel(o).toLowerCase().includes(q) || String(o.phone||'').includes(q)));
+  return list.length ? list.map(orderRow).join('') : `<div class="empty">${q ? t('noMatch') : t('noneHere')}</div>`;
+}
+function viewOrders(){
+  const f = state.filter;
+  const chip = (k,l) => `<button class="chip" data-act="filter" data-f="${k}" aria-pressed="${f===k}">${l}</button>`;
+  return `
+  <div class="top">
+    <div><h1>${t('ordersTitle')}</h1><div class="sub">${t('recordedN',{n:state.orders.length})}</div></div>
+  </div>
+  <div class="searchbox"><input class="in" type="search" id="q" data-input="q" placeholder="${esc(t('searchPh'))}" value="${esc(state.q)}" aria-label="${esc(t('searchPh'))}"></div>
+  <div class="chips" style="margin-top:10px">${chip('all',t('fAll'))}${chip('due',t('fDue'))}${chip('over',t('fOver'))}${chip('part',t('fPart'))}${chip('paid',t('fPaid'))}</div>
+  <div class="sec" style="margin-top:12px"><div class="card" style="padding:4px 16px" id="olist">${ordersListHtml()}</div></div>`;
+}
+
+function customersInner(){
+  const q = (state.cq || '').trim().toLowerCase();
+  const cs = customers().filter(c => !q || c.name.toLowerCase().includes(q) || String(c.phone || '').includes(q));
+  const tb = fromPaisa(cs.reduce((a,c) => a + c.boughtP, 0)), tp = fromPaisa(cs.reduce((a,c) => a + c.paidP, 0));
+  const num = v => rs(v).replace(/^(Rs|रु) /,'');
+  return `${cs.length ? `<table>
+      <thead><tr><th>${t('colCustomer')}</th><th>${t('colBought')}</th><th>${t('colPaid')}</th><th>${t('colLeft')}</th></tr></thead>
+      <tbody>${cs.map(c => { const l = subMoney(c.bought, c.paid); return `<tr class="clk" data-act="openCustomer" data-n="${esc(c.name)}">
+        <td>${esc(c.name)}</td><td>${num(c.bought)}</td><td>${num(c.paid)}</td><td class="${l>0?'left-due':'left-ok'}">${l>0?num(l):t('clear')}</td></tr>`; }).join('')}</tbody>
+      <tfoot><tr><td>${t('total')}</td><td>${num(tb)}</td><td>${num(tp)}</td><td class="left-due">${num(subMoney(tb, tp))}</td></tr></tfoot>
+    </table><div class="small mute" style="margin-top:12px">${t('amountsRs')}</div>` : `<div class="empty">${q ? t('noMatch') : `<b>${t('noCust')}</b>${t('noCustHint')}`}</div>`}`;
+}
+function viewCustomers(){
+  return `
+  <div class="top"><div><h1>${t('custTitle')}</h1><div class="sub">${t('tapName')}</div></div></div>
+  <div class="searchbox"><input class="in" type="search" id="cq" data-input="cq" placeholder="${esc(t('searchCust'))}" value="${esc(state.cq || '')}" aria-label="${esc(t('searchCust'))}"></div>
+  <div class="sec" style="margin-top:12px"><div class="card" id="ctable">${customersInner()}</div></div>`;
+}
+
+function viewSettings(){
+  const r = state.remind, u = state.user, s = state.shop;
+  return `
+  <div class="top"><div><h1>${t('settingsTitle')}</h1></div></div>
+  <div class="sec" style="margin-top:12px"><div class="card who">
+    <div class="avatar">${avatarInner()}</div>
+    <div style="min-width:0"><b>${esc(u.name)}</b><span class="small mute" style="word-break:break-all">${esc(u.email)}</span><div class="small mute">${t('signedWith',{via:esc(u.via)})}</div></div>
+  </div></div>
+
+  <div class="sec"><h2>Enterprise Offline Suite</h2><div class="card">
+    <button class="btn alt" style="margin-top:0" data-act="openAudit">🔐 ${t('auditTrail')} (${state.auditLog.length})</button>
+    <button class="btn alt" data-act="openSnapshots">🕒 ${t('snapshots')} (${state.snapshots.length})</button>
+    <button class="btn alt" data-act="openGov">🛡️ ${t('governance')} (${state.role})</button>
+    <button class="btn alt" data-act="toggleSandbox">🧪 ${state.sandbox ? 'Exit What-If Sandbox' : t('sandboxMode')}</button>
+  </div></div>
+
+  <div class="sec"><h2>${t('shopDetails')}</h2><div class="card">
+    <div class="kv"><b>${esc(s.name || '—')}</b><span class="mute small">${t('shopHint')}</span></div>
+    ${s.phone || s.address || s.pan ? `<div class="small mute">${esc([s.phone, s.address, s.pan ? 'PAN: '+s.pan : ''].filter(Boolean).join(' · '))}</div>` : ''}
+    <div class="seg c2" style="margin-top:12px">
+      <button data-act="editShop">${t('editShop')}</button>
+      <button data-act="dayClose">${t('dayClose').split('&')[0].trim()}</button>
+    </div>
+  </div></div>
+  <div class="sec"><h2>${t('language')}</h2><div class="card">
+    <div class="seg c2" style="margin-bottom:10px"><button data-act="lang" data-l="en" aria-pressed="${LANG==='en'}">English</button><button data-act="lang" data-l="ne" aria-pressed="${LANG==='ne'}">नेपाली</button></div>
+    <select class="in" data-change="langSelect" aria-label="${t('language')}">
+      ${Object.entries(LANG_NAMES).map(([code, name]) => `<option value="${code}" ${LANG===code?'selected':''}>${esc(name)}</option>`).join('')}
+    </select>
+  </div></div>
+  <div class="sec"><h2>${t('dailyReminder')}</h2><div class="card">${alertRows()}
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+      <div><b id="rl">${t('remindEvery')}</b><div class="small mute">${t('remindHint')}</div></div>
+      <button class="sw dk" role="switch" aria-checked="${r.on}" aria-labelledby="rl" data-act="toggleRemind"></button>
+    </div>
+    <label class="f" for="rt">${t('remindTime')}</label>
+    <input class="in" id="rt" type="time" value="${r.time}" data-change="setTime">
+    <label class="f" for="rm">${t('sendTo')}</label>
+    <input class="in" id="rm" type="email" inputmode="email" placeholder="${esc(u.email)}" value="${esc(r.email || '')}" data-change="remindEmail">
+    <div class="small mute" style="margin-top:6px">${t('sendToHint')}</div>
+    <div class="seg c2" style="margin-top:14px">
+      <button data-act="testRemind">${t('testRemind')}</button>
+      <button data-act="overdueNotify">${t('overdueNotify')}</button>
+    </div>
+    <div class="note">${t('pushNote')}</div>
+  </div></div>
+  <div class="sec"><h2>${t('account')}</h2><div class="card">
+    <div class="kv"><span class="mute">${t('ordersRecorded')}</span><b>${state.orders.length}</b></div>
+    <button class="btn alt" data-act="legal" data-d="terms">${t('terms')}</button>
+    <button class="btn alt" data-act="legal" data-d="policy">${t('policies')}</button>
+    <button class="btn alt danger" data-act="logout">${t('logout')}</button>
+  </div></div>`;
+}
+
+function viewTabs(){
+  const b = (k,l,i) => `<button class="tab" data-act="goto" data-t="${k}" ${state.tab===k?'aria-current="page"':''}>${ic[i]}<span>${l}</span></button>`;
+  return `<nav class="tabs" aria-label="Main">${b('home',t('home'),'home')}${b('orders',t('orders'),'list')}
+    <button class="fab" data-act="newSale" aria-label="${esc(t('recordSale'))}">${ic.plus}</button>
+    ${b('customers',t('customers'),'users')}${b('settings',t('settings'),'gear')}</nav>`;
+}
+
+function render(){
+  try{
+    document.documentElement.lang = LANG;
+    const app = $('#app');
+    if(!app) return;
+    if(!state.user){
+      app.style.paddingBottom = '0'; app.innerHTML = viewAuth();
+      if(clientId() && navigator.onLine) loadGSI().catch(() => {});
+      if(state.auth.step !== 'start'){ const f = $('#cd') || $('#em'); if(f) setTimeout(() => f.focus(), 60); }
+      return;
+    }
+    save();
+    app.style.paddingBottom = '';
+    const sbBanner = state.sandbox ? `<div class="sandbox-bar"><span>🧪 SANDBOX MODE — Changes will NOT affect live books</span><button data-act="toggleSandbox">Exit</button></div>` : '';
+    const v = {home:viewHome, orders:viewOrders, customers:viewCustomers, settings:viewSettings}[state.tab]();
+    app.innerHTML = sbBanner + v + viewTabs();
+  }catch(err){
+    console.error(err);
+    const app = $('#app');
+    if(app) app.innerHTML = `<div class="auth"><h2>Hisab Pro</h2><p class="mute">Recovery mode triggered. Click below to reload safely.</p><button class="btn" onclick="location.reload()">Reload App</button></div>`;
+  }
+}
+
+/* ---------- Sheets + Toast + Mobile Hardware Back Support ---------- */
+function openSheet(html){
+  $('#sheet').innerHTML = '<div class="grab"></div>' + html;
+  $('#scrim').classList.add('on');
+  $('#sheet').classList.add('on');
+  document.body.classList.add('noscroll');
+  $('#sheet').scrollTop = 0;
+  try{ if(!history.state || !history.state.sheet) history.pushState({sheet:true}, ''); }catch(e){}
+}
+function closeSheet(){
+  $('#scrim').classList.remove('on');
+  $('#sheet').classList.remove('on');
+  document.body.classList.remove('noscroll');
+}
+window.addEventListener('popstate', () => {
+  if($('#cmd-modal').classList.contains('on')) closeCmdPalette();
+  else if($('#sheet').classList.contains('on')) closeSheet();
+});
+
+let toastTimer;
+function toast(title, msg){
+  const el = $('#toast');
+  el.innerHTML = `${ic.bell}<div><b>${esc(title)}</b>${esc(msg||'')}</div>`;
+  el.classList.add('on'); clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('on'), 4200);
+}
+function sheetConfirm({title, text, label, act, attrs, back}){
+  openSheet(`<h2>${esc(title)}</h2><p class="mute" style="margin:8px 0 0">${esc(text)}</p>
+    <button class="btn danger" style="background:var(--due-bg);color:var(--due)" data-act="${act}" ${attrs||''}>${esc(label)}</button>
+    <button class="btn alt" data-act="${back ? 'openOrder' : 'closeSheet'}" ${back ? `data-id="${back}"` : ''}>${t('cancel')}</button>`);
+}
+
+/* =====================================================================
+   ENTERPRISE OFFLINE ENGINES
+   ===================================================================== */
+function sheetAudit(){
+  openSheet(`
+    <h2>${t('auditTrail')}</h2>
+    <div class="mute small">${t('auditHint')}</div>
+    <div class="card" style="margin-top:12px">
+      ${state.auditLog.length ? state.auditLog.slice(0, 40).map(a => `
+        <div class="audit-item">
+          <div style="display:flex;justify-content:space-between"><b>${esc(a.action)}</b><span class="small mute">${dshort(a.ts)} ${new Date(a.ts).toTimeString().slice(0,5)}</span></div>
+          <div>${esc(a.detail)}</div>
+          <div class="hash-tag">SHA-256: ${a.hash.slice(0, 16)}…</div>
+        </div>
+      `).join('') : '<div class="empty">No audit events recorded yet.</div>'}
+    </div>
+    <button class="btn alt" data-act="closeSheet">${t('close')}</button>
+  `);
+}
+
+function sheetSnapshots(){
+  openSheet(`
+    <h2>${t('snapshots')}</h2>
+    <div class="mute small">${t('snapshotsHint')}</div>
+    <button class="btn" style="margin-top:12px" data-act="takeSnapshot">+ Create Point-in-Time Snapshot Now</button>
+    <div class="card" style="margin-top:12px">
+      ${state.snapshots.length ? state.snapshots.map((s, i) => `
+        <div class="audit-item" style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+          <div>
+            <b>${esc(s.label)}</b>
+            <div class="small mute">${dlong(s.ts)} · ${s.ordersCount} orders</div>
+            <div class="hash-tag">Checksum: ${esc(s.checksum)}</div>
+          </div>
+          <button class="chip go" data-act="rollbackSnapshot" data-idx="${i}">Rollback</button>
+        </div>
+      `).join('') : '<div class="empty">No snapshots yet.</div>'}
+    </div>
+    <button class="btn alt" data-act="closeSheet">${t('close')}</button>
+  `);
+}
+
+function sheetGovernance(){
+  openSheet(`
+    <h2>${t('governance')}</h2>
+    <div class="mute small">Role-Based Access Control (RBAC) & Period Locking</div>
+    <div class="card" style="margin-top:12px">
+      <label class="f" style="margin-top:0">Active Role</label>
+      <div class="seg c2">
+        <button type="button" data-act="setRole" data-r="supervisor" aria-pressed="${state.role==='supervisor'}">Supervisor</button>
+        <button type="button" data-act="setRole" data-r="operator" aria-pressed="${state.role==='operator'}">Operator</button>
+      </div>
+      <div class="small mute" style="margin-top:8px">Operators can record sales & collect payments, but cannot delete orders, unlock closed days, or alter settings.</div>
+      <label class="f" for="gov-pin">Supervisor PIN (4 digits, optional)</label>
+      <div style="display:flex;gap:8px">
+        <input class="in" id="gov-pin" type="password" inputmode="numeric" maxlength="4" placeholder="••••" value="${esc(state.pin)}">
+        <button class="chip go" data-act="savePin">Set PIN</button>
+      </div>
+    </div>
+    ${state.lockedDates.length ? `<div class="card" style="margin-top:12px">
+      <b>Locked Diurnal Periods (${state.lockedDates.length})</b>
+      ${state.lockedDates.map(dt => `<div class="kv"><span>🔒 ${esc(dt)}</span><button class="linkbtn" data-act="unlockDate" data-dt="${esc(dt)}">Unlock</button></div>`).join('')}
+    </div>` : ''}
+    <button class="btn alt" data-act="closeSheet">${t('close')}</button>
+  `);
+}
+
+function sheetAnomalies(){
+  const list = detectAnomalies();
+  openSheet(`
+    <h2>Anomaly & Fraud Alerts</h2>
+    <div class="mute small">Automated local pattern checks on your ledger</div>
+    <div class="card" style="margin-top:12px">
+      ${list.length ? list.map(a => `<div class="audit-item"><b style="color:var(--due)">${esc(a.type)}</b><div>${esc(a.msg)}</div></div>`).join('') : '<div class="empty">No anomalies detected.</div>'}
+    </div>
+    <button class="btn alt" data-act="closeSheet">${t('close')}</button>
+  `);
+}
+
+/* ---------- Command Palette (Ctrl+K) ---------- */
+const COMMANDS = [
+  {name:'Record New Sale', kbd:'N', fn:() => sheetNewSale()},
+  {name:'Collect Customer Payment', kbd:'C', fn:() => sheetCollect()},
+  {name:'Day Close & Cash Drawer Tally', kbd:'D', fn:() => sheetDayClose()},
+  {name:'Inventory & Stock Manager', kbd:'S', fn:() => sheetStock()},
+  {name:'Cryptographic Audit Trail', kbd:'A', fn:() => sheetAudit()},
+  {name:'Point-in-Time Snapshots & Rollback', kbd:'B', fn:() => sheetSnapshots()},
+  {name:'Toggle What-If Sandbox Mode', kbd:'W', fn:() => A.toggleSandbox()}
+];
+function openCmdPalette(){
+  const m = $('#cmd-modal'), inp = $('#cmd-in');
+  m.classList.add('on'); inp.value = ''; renderCmdList('');
+  setTimeout(() => inp.focus(), 40);
+}
+function closeCmdPalette(){ $('#cmd-modal').classList.remove('on'); }
+function renderCmdList(q){
+  const list = COMMANDS.filter(c => c.name.toLowerCase().includes(q.toLowerCase()));
+  $('#cmd-list').innerHTML = list.map((c, i) => `<button class="cmd-item" data-cmd="${i}"><span>${esc(c.name)}</span><span class="cmd-kbd">${esc(c.kbd)}</span></button>`).join('');
+  window._cmdFiltered = list;
+}
+
+/* ---------- Multi-Item Billing & Auto-Stock Deduction ---------- */
+let saleKind = 'cash', isMultiBill = false, billLines = [];
+function recentChips(){
+  const seen = new Set(), items = [];
+  state.products.slice(0, 4).forEach(p => {
+    seen.add(p.name.toLowerCase());
+    items.push({item:p.name, total:p.price, pid:p.id});
+  });
+  for(const o of [...state.orders].reverse()){
+    const k = o.item.trim().toLowerCase();
+    if(!seen.has(k)){ seen.add(k); items.push({item:o.item, total:o.total}); if(items.length >= 6) break; }
+  }
+  window._recent = items;
+  if(!items.length) return '';
+  return `<div class="small mute" style="font-weight:600;margin:12px 0 6px">${t('quickAdd')}</div><div class="chips" style="padding:0;margin:0 -2px">${items.map((o,i) => `<button type="button" class="chip" data-act="pickItem" data-i="${i}">${esc(o.item)} · ${rs(o.total)}</button>`).join('')}</div>`;
+}
+function autoPhone(){
+  const nm = ($('#s-name') || {}).value, ph = $('#s-phone');
+  if(!nm || !ph || ph.value) return;
+  const c = customers().find(x => x.name.toLowerCase() === nm.trim().toLowerCase());
+  if(c && c.phone) ph.value = c.phone;
+}
+function renderBillLines(){
+  const box = $('#bill-lines-wrap'); if(!box) return;
+  const prods = state.products.map(p => `<option value="${esc(p.name)}">`).join('');
+  box.innerHTML = `<datalist id="prod-list">${prods}</datalist>
+    <div class="line-items">${billLines.map((ln, idx) => `
+      <div class="line-row">
+        <input class="in" list="prod-list" data-line="${idx}" data-f="name" placeholder="${esc(t('item'))}" value="${esc(ln.name)}">
+        <input class="in" type="number" inputmode="decimal" min="1" data-line="${idx}" data-f="qty" placeholder="${t('qty')}" value="${ln.qty}">
+        <input class="in" type="number" inputmode="decimal" min="0" data-line="${idx}" data-f="rate" placeholder="${t('rate')}" value="${ln.rate}">
+        <button type="button" class="xbtn" data-act="delLine" data-idx="${idx}">✕</button>
+      </div>`).join('')}
+    </div>
+    <button type="button" class="linkbtn" style="margin-top:8px;font-size:14px" data-act="addLine">${t('addItemRow')}</button>`;
+  recalcBillTotal();
+}
+function recalcBillTotal(){
+  let subP = 0;
+  if(isMultiBill){
+    subP = billLines.reduce((a, l) => a + toPaisa(mulMoney(l.rate, l.qty)), 0);
+  } else {
+    subP = toPaisa(($('#s-amt') || {}).value);
+  }
+  const discP = toPaisa(($('#s-disc') || {}).value);
+  const tax = parseFloat(($('#s-tax') || {}).value) || 0;
+  const afterDiscP = Math.max(0, subP - discP);
+  const grand = fromPaisa(Math.round(afterDiscP + (afterDiscP * tax / 100)));
+  if(isMultiBill && $('#s-amt')) $('#s-amt').value = grand || '';
+  const tend = parseFloat(($('#s-tend') || {}).value) || 0;
+  const chEl = $('#change-out');
+  if(chEl){
+    if(tend > grand && grand > 0){
+      chEl.hidden = false;
+      chEl.innerHTML = `<span>${t('changeDue')}</span><b>${rs(subMoney(tend, grand))}</b>`;
+    } else chEl.hidden = true;
+  }
+  return grand;
+}
+function sheetNewSale(pre){
+  saleKind = 'cash'; window._advm = 'cash'; isMultiBill = false;
+  billLines = [{name:'', qty:1, rate:''}];
+  const names = customers().map(c => `<option value="${esc(c.name)}">`).join('');
+  const prods = state.products.map(p => `<option value="${esc(p.name)}">`).join('');
+  openSheet(`
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <h2>${t('recordSaleT')}</h2>
+      <button type="button" class="chip" id="toggle-multi" data-act="toggleMulti">${t('multiItem')}</button>
+    </div>
+    <div class="mute small">${t('savedAs',{id:'<b>ORD-'+nextId+'</b>'})}</div>
+    ${recentChips()}
+    <div style="display:flex;justify-content:space-between;align-items:baseline">
+      <label class="f" for="s-name">${t('custName')}</label>
+      <button type="button" class="linkbtn" style="font-size:13px" data-act="setWalkIn">${t('walkIn')}</button>
+    </div>
+    <input class="in" id="s-name" list="s-names" autocomplete="off" placeholder="${esc(t('whoBought'))}"><datalist id="s-names">${names}</datalist>
+    
+    <div id="single-item-wrap">
+      <label class="f" for="s-item">${t('item')}</label>
+      <input class="in" id="s-item" list="s-prods" autocomplete="off" placeholder="${esc(t('whatSold'))}"><datalist id="s-prods">${prods}</datalist>
+    </div>
+    <div id="bill-lines-wrap" hidden></div>
+
+    <div class="grid2">
+      <div>
+        <label class="f" for="s-disc">${t('discount')}</label>
+        <input class="in" id="s-disc" type="number" inputmode="decimal" min="0" placeholder="0">
+      </div>
+      <div>
+        <label class="f" for="s-tax">${t('taxPct')}</label>
+        <input class="in" id="s-tax" type="number" inputmode="decimal" min="0" placeholder="0">
+      </div>
+    </div>
+
+    <label class="f" for="s-amt">${t('totalPrice')}</label>
+    <input class="in" id="s-amt" type="number" inputmode="decimal" min="0" placeholder="0">
+
+    <label class="f">${t('howPaid')}</label>
+    ${segHtml('s-kind','kind',[...METHODS,'credit'],'cash')}
+    
+
+
+    <div id="s-credit" hidden>
+      <label class="f" for="s-phone">${t('custPhone')}</label>
+      <input class="in" id="s-phone" type="tel" inputmode="tel" placeholder="98XXXXXXXX">
+      <label class="f" for="s-adv">${t('paidSoFar')}</label>
+      <input class="in" id="s-adv" type="number" inputmode="decimal" min="0" placeholder="0">
+      <label class="f">${t('advanceBy')}</label>
+      ${segHtml('s-advm','advm',METHODS,'cash','c2')}
+    </div>
+    <div class="err" id="s-err"></div>
+    <button class="btn" style="margin-top:6px" data-act="saveSale">${t('saveSale')}</button>
+    <button class="btn alt" data-act="saveSale" data-again="1">${t('saveAdd')}</button>`);
+  if(pre){ $('#s-name').value = pre.customer || ''; $('#s-item').value = pre.item || ''; $('#s-amt').value = pre.total || ''; }
+  setTimeout(() => { const el = $('#s-name'); if(el) el.focus(); }, 60);
+}
+
+/* ---------- Stock / Inventory Sheet ---------- */
+function sheetStock(){
+  const list = state.products;
+  openSheet(`<h2>${t('stockTitle')}</h2><div class="mute small">${t('stockHint')}</div>
+    <div class="card" style="padding:4px 16px;margin-top:12px">
+      ${list.length ? list.map(p => {
+        const isLow = Number(p.qty) <= Number(p.low || 5);
+        return `<div class="row">
+          <div class="mid"><b>${esc(p.name)}</b><span>${rs(p.price)} ${p.cost ? `· Cost: ${rs(p.cost)}` : ''}</span></div>
+          <div class="end" style="display:flex;align-items:center;gap:8px">
+            <span class="stock-pill ${isLow?'stock-low':''}">${p.qty} left</span>
+            <button class="xbtn" data-act="delProd" data-id="${p.id}">✕</button>
+          </div>
+        </div>`;
+      }).join('') : `<div class="empty">${t('noStock')}</div>`}
+    </div>
+    <h3 class="serif" style="font-size:18px;margin-top:18px">${t('addProduct')}</h3>
+    <label class="f" for="pr-name">${t('prodName')}</label><input class="in" id="pr-name" autocomplete="off">
+    <div class="grid2">
+      <div><label class="f" for="pr-price">${t('prodPrice')}</label><input class="in" id="pr-price" type="number" inputmode="decimal"></div>
+      <div><label class="f" for="pr-cost">${t('prodCost')}</label><input class="in" id="pr-cost" type="number" inputmode="decimal"></div>
+    </div>
+    <div class="grid2">
+      <div><label class="f" for="pr-qty">${t('prodQty')}</label><input class="in" id="pr-qty" type="number" inputmode="numeric" value="10"></div>
+      <div><label class="f" for="pr-low">${t('prodLow')}</label><input class="in" id="pr-low" type="number" inputmode="numeric" value="5"></div>
+    </div>
+    <button class="btn" data-act="saveProd">${t('saveProd')}</button>
+    <button class="btn alt" data-act="closeSheet">${t('close')}</button>`);
+}
+
+/* ---------- Day Close, Period Hard-Lock & Cash Drawer Reconciliation ---------- */
+function sheetDayClose(){
+  const todayStr = new Date().toDateString();
+  let soldP = 0, cashInP = 0, digitalInP = 0, expP = 0;
+  state.orders.forEach(o => {
+    if(new Date(o.date).toDateString() === todayStr) soldP += toPaisa(o.total);
+    o.pay.forEach(p => {
+      if(new Date(p.date).toDateString() === todayStr){
+        if(p.m === 'cash') cashInP += toPaisa(p.amt); else digitalInP += toPaisa(p.amt);
+      }
+    });
+  });
+  state.expenses.forEach(x => { if(new Date(x.date).toDateString() === todayStr) expP += toPaisa(x.amt); });
+  const expectedCash = Math.max(0, fromPaisa(cashInP - expP));
+
+  openSheet(`<h2>${t('dayClose')}</h2><div class="mute small">${t('dayCloseHint')}</div>
+    <div class="card" style="margin-top:12px">
+      <div class="kv"><span class="mute">${t('itemsSold')} (${t('today')})</span><b>${rs(fromPaisa(soldP))}</b></div>
+      <div class="kv"><span class="mute">${t('recvCash')}</span><b style="color:var(--ok)">${rs(fromPaisa(cashInP))}</b></div>
+      <div class="kv"><span class="mute">eSewa / Khalti / e-Cash</span><b>${rs(fromPaisa(digitalInP))}</b></div>
+      <div class="kv"><span class="mute">${t('expensesP')} (${t('today')})</span><b style="color:var(--due)">-${rs(fromPaisa(expP))}</b></div>
+      <div class="kv" style="border-top:1px solid var(--line);padding-top:10px"><b>Expected Cash in Drawer</b><b class="amt">${rs(expectedCash)}</b></div>
+    </div>
+    <label class="f" for="dc-open">${t('openingCash')}</label>
+    <input class="in" id="dc-open" type="number" inputmode="decimal" value="0" data-expected="${expectedCash}">
+    <label class="f" for="dc-act">${t('actualCash')}</label>
+    <input class="in" id="dc-act" type="number" inputmode="decimal" value="${expectedCash}">
+    <div class="calc-bar" id="dc-diff-bar"><span>${t('cashDiff')}</span><b>${rs(0)}</b></div>
+    <button class="btn" data-act="doDayClose">${t('sendEodEmail')}</button>
+    <button class="btn alt" data-act="closeSheet">${t('close')}</button>`);
+}
+
+function contactBtns(name, phone, left){
+  if(!phone || !(left > 0)) return '';
+  const msg = encodeURIComponent(t('dueMsg', {name, shop:shopName(), amt:rs(left)}));
+  let d = String(phone).replace(/\D/g,''); if(d.startsWith('00')) d = d.slice(2); if(d.length === 10) d = '977' + d;
+  return `<div style="margin-top:14px"><div class="small mute" style="font-weight:600;margin-bottom:6px">${t('remindCust')}</div>
+    <div class="seg c2"><a class="btnlink" href="sms:${esc(phone)}?&body=${msg}">${t('sms')}</a>
+    <a class="btnlink" href="https://wa.me/${d}?text=${msg}" target="_blank" rel="noopener">${t('whatsapp')}</a></div></div>`;
+}
+
+function sheetOrder(id){
+  const o = state.orders.find(x => x.id === id); if(!o) return;
+  const left = leftOf(o);
+  const locked = isDateLocked(o.date);
+  window._pm = 'cash';
+  openSheet(`
+    <h2>${orderLabel(o)} ${locked ? '🔒' : ''}</h2>
+    <div class="mute">${esc(o.customer)} · ${dshort(o.date)}</div>
+    ${locked ? `<div class="note">${t('periodLockedMsg')}</div>` : ''}
+    <div class="card" style="margin-top:14px">
+      <div class="kv"><span class="mute">${t('itemL')}</span><b>${esc(o.item)}</b></div>
+      <div class="kv"><span class="mute">${t('totalL')}</span><b class="amt">${rs(o.total)}</b></div>
+      <div class="kv"><span class="mute">${t('paidTill')}</span><b class="amt" style="color:var(--ok)">${rs(paidOf(o))}</b></div>
+      <div class="kv"><span class="mute">${t('leftToPay')}</span><b class="amt" style="color:${left?'var(--due)':'var(--ok)'}">${left?rs(left):t('nothing')}</b></div>
+      ${o.phone ? `<div class="kv"><span class="mute">${t('phoneL')}</span><a class="link" href="tel:${esc(o.phone)}">${esc(o.phone)}</a></div>` : ''}
+    </div>
+    ${contactBtns(o.customer, o.phone, left)}
+    ${o.pay.length ? `<h3 class="serif" style="font-size:18px;margin-top:18px">${t('payments')}</h3><ul class="pays">${o.pay.map((p,i) => `<li><span>${dshort(p.date)} · ${esc(mLabel(p.m))}</span><span style="display:flex;align-items:center;gap:4px"><b class="amt">${rs(p.amt)}</b>${!locked && state.role==='supervisor' ? `<button class="xbtn" data-act="askDelPay" data-id="${o.id}" data-i="${i}" aria-label="${esc(t('remove'))}">✕</button>` : ''}</span></li>`).join('')}</ul>` : ''}
+    ${left ? `
+      <h3 class="serif" style="font-size:18px;margin-top:20px">${t('recordPay')}</h3>
+      <label class="f" for="p-amt">${t('amtRecv')}</label>
+      <input class="in" id="p-amt" type="number" inputmode="decimal" min="0" value="${left}">
+      <label class="f">${t('recvAs')}</label>
+      ${segHtml('p-m','pm',METHODS,'cash','c2')}
+      <div class="err" id="p-err"></div>
+      <button class="btn" style="margin-top:6px" data-act="savePay" data-id="${o.id}">${t('savePay')}</button>` : ''}
+    <div class="seg c2" style="margin-top:10px"><button data-act="repeatOrder" data-id="${o.id}">${t('repeatSale')}</button><button data-act="receipt" data-id="${o.id}">${t('receipt')}</button></div>
+    ${!locked && state.role === 'supervisor' ? `<div class="seg c2" style="margin-top:10px"><button data-act="editOrder" data-id="${o.id}">${t('editOrder')}</button><button data-act="askDelOrder" data-id="${o.id}" style="color:var(--due)">${t('deleteOrder')}</button></div>` : ''}
+    <button class="btn alt" data-act="closeSheet">${t('close')}</button>`);
+}
+
+function sheetEdit(id){
+  const o = state.orders.find(x => x.id === id); if(!o) return;
+  openSheet(`
+    <h2>${t('editT',{id:orderLabel(o)})}</h2>
+    <label class="f" for="e-name">${t('custName')}</label><input class="in" id="e-name" autocomplete="off" value="${esc(o.customer)}">
+    <label class="f" for="e-phone">${t('custPhone')}</label><input class="in" id="e-phone" type="tel" inputmode="tel" value="${esc(o.phone || '')}">
+    <label class="f" for="e-item">${t('item')}</label><input class="in" id="e-item" autocomplete="off" value="${esc(o.item)}">
+    <label class="f" for="e-total">${t('totalPrice')}</label><input class="in" id="e-total" type="number" inputmode="decimal" min="0" value="${o.total}">
+    <div class="err" id="e-err"></div>
+    <button class="btn" style="margin-top:6px" data-act="saveEdit" data-id="${o.id}">${t('saveChanges')}</button>
+    <button class="btn alt" data-act="openOrder" data-id="${o.id}">${t('cancel')}</button>`);
+}
+
+function sheetCustomer(name){
+  const c = customers().find(x => x.name === name); if(!c) return;
+  const left = subMoney(c.bought, c.paid);
+  const meta = state.custMeta[name.toLowerCase()] || {};
+  window._cpm = 'cash';
+  openSheet(`
+    <h2>${esc(c.name)}</h2>
+    ${c.phone ? `<a class="link" href="tel:${esc(c.phone)}">${esc(c.phone)}</a>` : `<span class="mute small">${t('noPhone')}</span>`}
+    <div class="grid2" style="margin-top:14px">
+      <div class="card stat"><div class="k">${t('bought')}</div><div class="v">${rs(c.bought)}</div></div>
+      <div class="card stat"><div class="k">${t('paid')}</div><div class="v ok">${rs(c.paid)}</div></div>
+    </div>
+    <div class="card stat" style="margin-top:10px"><div class="k">${t('leftToPay')}</div><div class="v ${left?'due':'ok'}">${left?rs(left):t('allClear')}</div></div>
+    
+    <label class="f" for="c-lim">${t('creditLimit')}</label>
+    <div style="display:flex;gap:8px">
+      <input class="in" id="c-lim" type="number" inputmode="decimal" placeholder="0" value="${meta.limit || ''}">
+      <button class="chip go" data-act="saveCustLim" data-n="${esc(c.name)}">Save</button>
+    </div>
+
+    ${contactBtns(c.name, c.phone, left)}
+    ${left > 0 ? `<h3 class="serif" style="font-size:18px;margin-top:18px">${t('receivePay')}</h3>
+      <div class="small mute">${t('receivePayHint')}</div>
+      <label class="f" for="cp-amt">${t('amtRecv')}</label>
+      <input class="in" id="cp-amt" type="number" inputmode="decimal" min="0" value="${left}">
+      <label class="f">${t('recvAs')}</label>${segHtml('cp-m','cpm',METHODS,'cash','c2')}
+      <div class="err" id="cp-err"></div>
+      <button class="btn" style="margin-top:6px" data-act="custPay" data-n="${esc(c.name)}">${t('receivePay')}</button>` : ''}
+    <h3 class="serif" style="font-size:18px;margin:18px 0 0">${t('ordersL')}</h3>
+    <div class="card" style="padding:4px 16px;margin-top:8px">${[...c.orders].reverse().map(orderRow).join('')}</div>
+    <button class="btn alt" data-act="closeSheet">${t('close')}</button>`);
+}
+
+function receiptText(o){
+  const s = state.shop, L = [];
+  L.push(shopName()); if(s.address) L.push(s.address); if(s.phone) L.push(s.phone); if(s.pan) L.push('PAN/VAT: ' + s.pan);
+  L.push('', `${t('receiptT')} ${orderLabel(o)}`, `${t('rDate')}: ${dlong(o.date)}`, `${t('rCustomer')}: ${o.customer}`, `${t('rItem')}: ${o.item}`, '',
+    `${t('rTotal')}: ${rs(o.total)}`, `${t('rPaid')}: ${rs(paidOf(o))}`, `${t('rBalance')}: ${rs(leftOf(o))}`, '', t('thanks'));
+  return L.join('\n');
+}
+function sheetReceipt(id){
+  const o = state.orders.find(x => x.id === id); if(!o) return;
+  const s = state.shop, left = leftOf(o);
+  openSheet(`
+    <div class="receipt">
+      <div class="r-shop">${esc(shopName())}</div>
+      ${s.address ? `<div class="r-sub">${esc(s.address)}</div>` : ''}${s.phone ? `<div class="r-sub">${esc(s.phone)}</div>` : ''}${s.pan ? `<div class="r-sub">PAN/VAT: ${esc(s.pan)}</div>` : ''}
+      <div class="r-title">${t('receiptT')} · ${orderLabel(o)}</div>
+      <div class="r-line"><span>${t('rDate')}</span><span>${dlong(o.date)}</span></div>
+      <div class="r-line"><span>${t('rCustomer')}</span><span>${esc(o.customer)}</span></div>
+      <div class="r-line"><span>${t('rItem')}</span><span>${esc(o.item)}</span></div>
+      <div class="r-line big"><span>${t('rTotal')}</span><span>${rs(o.total)}</span></div>
+      <div class="r-line"><span>${t('rPaid')}</span><span>${rs(paidOf(o))}</span></div>
+      <div class="r-line"><span>${t('rBalance')}</span><span><b>${rs(left)}</b></span></div>
+      ${o.pay.length ? `<div class="r-pays">${o.pay.map(p => `${dshort(p.date)} · ${esc(mLabel(p.m))} · ${rs(p.amt)}`).join('<br>')}</div>` : ''}
+      <div class="r-thanks">${t('thanks')}</div>
+    </div>
+    <button class="btn noprint" data-act="shareReceipt" data-id="${o.id}">${t('share')}</button>
+    <button class="btn alt noprint" data-act="printReceipt" data-id="${o.id}">${t('print')}</button>
+    <button class="btn alt noprint" data-act="openOrder" data-id="${o.id}">${t('close')}</button>`);
+}
+
+function sheetShop(){
+  const s = state.shop;
+  openSheet(`<h2>${t('shopDetails')}</h2>
+    <label class="f" for="sh-n">${t('shopName')}</label><input class="in" id="sh-n" autocomplete="organization" value="${esc(s.name)}">
+    <label class="f" for="sh-p">${t('shopPhone')}</label><input class="in" id="sh-p" type="tel" inputmode="tel" value="${esc(s.phone)}">
+    <label class="f" for="sh-a">${t('shopAddr')}</label><input class="in" id="sh-a" autocomplete="street-address" value="${esc(s.address)}">
+    <label class="f" for="sh-pan">${t('shopPan')}</label><input class="in" id="sh-pan" value="${esc(s.pan || '')}">
+    <button class="btn" data-act="saveShop">${t('saveShop')}</button>
+    <button class="btn alt" data-act="closeSheet">${t('cancel')}</button>`);
+}
+
+function sheetCollect(){
+  const cs = customers().filter(c => subMoney(c.bought, c.paid) > 0);
+  openSheet(`<h2>${t('collectT')}</h2><div class="mute small">${t('collectHint')}</div>
+    <div class="card" style="padding:4px 16px;margin-top:12px">${cs.length ? cs.map(c => `<button class="row" data-act="openCustomer" data-n="${esc(c.name)}"><span class="mid"><b>${esc(c.name)}</b><span>${esc(c.phone || '')}</span></span><span class="end"><span class="amt" style="color:var(--due)">${rs(subMoney(c.bought, c.paid))}</span></span></button>`).join('') : `<div class="empty">${t('collectNone')}</div>`}</div>
+    <button class="btn alt" data-act="closeSheet">${t('close')}</button>`);
+}
+function sheetExpense(){
+  const cats = ['Stock','Rent','Transport','Salary','Electricity'].map(k => t('exp_' + k));
+  openSheet(`<h2>${t('addExpense')}</h2>
+    <div class="chips" style="padding:12px 0 0">${cats.map(l => `<button class="chip" data-act="expNote" data-v="${esc(l)}">${esc(l)}</button>`).join('')}</div>
+    <label class="f" for="x-note">${t('expNote')}</label><input class="in" id="x-note" autocomplete="off">
+    <label class="f" for="x-amt">${t('expAmt')}</label><input class="in" id="x-amt" type="number" inputmode="decimal" min="0" placeholder="0">
+    <div class="err" id="x-err"></div>
+    <button class="btn" style="margin-top:6px" data-act="saveExp">${t('saveExpense')}</button>
+    <button class="btn alt" data-act="closeSheet">${t('cancel')}</button>`);
+}
+function sheetExpList(){
+  const list = [...state.expenses].reverse().slice(0, 60);
+  openSheet(`<h2>${t('expenses')}</h2><div class="mute small">${t('expPeriod',{amt:rs(periodExpenses())})}</div>
+    <div class="card" style="padding:4px 16px;margin-top:12px">${list.length ? `<ul class="pays">${list.map(x => `<li><span>${dshort(x.date)} · ${esc(x.note)}</span><span style="display:flex;align-items:center;gap:4px"><b class="amt">${rs(x.amt)}</b><button class="xbtn" data-act="delExp" data-id="${x.id}" aria-label="${esc(t('remove'))}">✕</button></span></li>`).join('')}</ul>` : `<div class="empty">${t('noExp')}</div>`}</div>
+    <button class="btn" data-act="addExp">${t('addExpense')}</button>
+    <button class="btn alt" data-act="closeSheet">${t('close')}</button>`);
+}
+function sheetLegal(d){
+  const terms = d === 'terms';
+  openSheet(`<h2>${terms ? t('terms') : t('policies')}</h2>
+    <div class="card" style="margin-top:12px;font-size:15px">${terms ? t('termsBody') : t('policyBody')}</div>
+    <div class="note">${t('legalNote')}</div>
+    <button class="btn" data-act="closeSheet">${t('gotIt')}</button>`);
+}
+
+function sheetSetup(){
+  const c = cfg(), e = c.emailjs || {};
+  const origin = location.origin === 'null' ? '(open this page from an https link first)' : location.origin;
+  openSheet(`
+    <h2>Sign-in setup</h2>
+    <p class="mute small" style="margin:4px 0 0">Pre-configured with your credentials. You can also update them here anytime.</p>
+    <div class="card" style="margin-top:14px">
+      <h3 class="serif" style="font-size:18px">Google sign-in</h3>
+      <ol class="steps">
+        <li>Authorized JavaScript origin in Google Cloud Console: <code class="o">${esc(origin)}</code></li>
+      </ol>
+      <label class="f" for="cfg-g">Client ID</label>
+      <input class="in" id="cfg-g" autocomplete="off" value="${esc(clientId())}">
+    </div>
+    <div class="card" style="margin-top:12px">
+      <h3 class="serif" style="font-size:18px">EmailJS Configuration</h3>
+      <label class="f" for="cfg-es">Service ID</label><input class="in" id="cfg-es" autocomplete="off" value="${esc(e.service || EMAILJS.service)}">
+      <label class="f" for="cfg-et">Template ID</label><input class="in" id="cfg-et" autocomplete="off" value="${esc(e.template || EMAILJS.template)}">
+      <label class="f" for="cfg-ek">Public key</label><input class="in" id="cfg-ek" autocomplete="off" value="${esc(e.key || EMAILJS.key)}">
+      <label class="f" for="cfg-er">Reminder template ID</label><input class="in" id="cfg-er" autocomplete="off" value="${esc(c.reminderTemplate || EMAILJS.reminderTemplate)}">
+    </div>
+    <div class="err" id="cfg-err"></div>
+    <button class="btn" style="margin-top:6px" data-act="saveSetup">Save setup</button>
+    <button class="btn alt" data-act="closeSheet">${t('close')}</button>`);
+}
+
+/* =====================================================================
+   FILES: Export, Backup, Restore
+   ===================================================================== */
+function showExportFallback(name, text){
+  openSheet(`<h2>${esc(name)}</h2>
+    <div class="small mute" style="margin:4px 0 10px">Your device browser restricted direct file saving. Copy or share the content below:</div>
+    <textarea class="in" id="exp-raw" rows="10" readonly style="font-family:monospace;font-size:12px">${esc(text)}</textarea>
+    <button class="btn" data-act="copyExportRaw">Copy All Text</button>
+    <button class="btn alt" data-act="closeSheet">${t('close')}</button>`);
+}
+function buildReceiptPdfBlob(o, s, left){
+  const asc = v => String(v ?? '').replace(/[^\x20-\x7E]/g, '?');
+  const escPdf = v => asc(v).replace(/\\/g, '\\\\').replace(/\(/g, '\\(').replace(/\)/g, '\\)');
+  const wrap = (str, max) => {
+    const words = asc(str).split(/\s+/), out = []; let cur = '';
+    for(const w of words){
+      if(!cur) cur = w;
+      else if((cur + ' ' + w).length <= max) cur += ' ' + w;
+      else { out.push(cur); cur = w; }
+    }
+    if(cur) out.push(cur);
+    return out.length ? out : [''];
+  };
+  const lines = [];
+  const addC = (txt, size, bold) => {
+    const w = Math.max(24, Math.floor(320 / (size * 0.55)));
+    wrap(txt, w).forEach(ln => lines.push({align:'c', txt:ln, size, bold:!!bold}));
+  };
+  const addLR = (l, r, size, bold) => lines.push({align:'lr', l:asc(l), r:asc(r), size, bold:!!bold});
+  const addSep = (ch) => lines.push({align:'sep', ch:ch || '-'});
+
+  addC(shopName(), 16, true);
+  if(s.address) addC(s.address, 10, false);
+  if(s.phone) addC('Tel: ' + s.phone, 10, false);
+  if(s.pan) addC('PAN/VAT: ' + s.pan, 10, false);
+  addSep('=');
+  addC('RECEIPT - ' + orderLabel(o), 12, true);
+  addSep('-');
+  addLR('Date:', dlong(o.date), 10, false);
+  addLR('Customer:', o.customer, 10, false);
+  if(o.phone) addLR('Phone:', o.phone, 10, false);
+  addLR('Payment:', kindLabel(o.kind), 10, false);
+  addSep('-');
+  wrap('Item: ' + o.item, 44).forEach((ln, i) => lines.push({align:'l', txt:ln, size:10, bold:i===0}));
+  addSep('=');
+  addLR('Total:', 'Rs. ' + Number(o.total || 0).toLocaleString('en-IN'), 12, true);
+  addLR('Paid:', 'Rs. ' + Number(paidOf(o) || 0).toLocaleString('en-IN'), 10, false);
+  addLR('Balance Due:', 'Rs. ' + Number(left || 0).toLocaleString('en-IN'), 11, true);
+  if(o.pay && o.pay.length){
+    addSep('-');
+    lines.push({align:'l', txt:'Payments:', size:9, bold:true});
+    o.pay.forEach(p => addLR('  ' + dshort(p.date) + ' (' + mLabel(p.m) + ')', 'Rs. ' + Number(p.amt || 0).toLocaleString('en-IN'), 9, false));
+  }
+  addSep('=');
+  addC('Thank you for your business!', 10, false);
+
+  const W = 380, H = Math.max(420, 90 + lines.length * 18);
+  let y = H - 40;
+  const ops = ['0.04 0.07 0.05 rg', '0.04 0.07 0.05 RG'];
+  for(const ln of lines){
+    const sz = ln.size || 10;
+    const fnt = ln.bold ? '/F2' : '/F1';
+    if(ln.align === 'sep'){
+      const yLine = y + 4;
+      ops.push(`${ln.ch === '=' ? '1.2' : '0.6'} w 28 ${yLine} m ${W - 28} ${yLine} l S`);
+      y -= 14;
+    } else if(ln.align === 'c'){
+      const approxW = ln.txt.length * sz * 0.52;
+      const x = Math.max(28, (W - approxW) / 2);
+      ops.push(`BT ${fnt} ${sz} Tf ${x.toFixed(1)} ${y} Td (${escPdf(ln.txt)}) Tj ET`);
+      y -= (sz + 6);
+    } else if(ln.align === 'lr'){
+      const rW = ln.r.length * sz * 0.54;
+      const rx = Math.max(180, W - 28 - rW);
+      ops.push(`BT ${fnt} ${sz} Tf 28 ${y} Td (${escPdf(ln.l)}) Tj ET`);
+      ops.push(`BT ${fnt} ${sz} Tf ${rx.toFixed(1)} ${y} Td (${escPdf(ln.r)}) Tj ET`);
+      y -= (sz + 6);
+    } else {
+      ops.push(`BT ${fnt} ${sz} Tf 28 ${y} Td (${escPdf(ln.txt)}) Tj ET`);
+      y -= (sz + 6);
+    }
+  }
+  const stream = ops.join('\n');
+  const objs = [
+    '1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj',
+    '2 0 obj << /Type /Pages /Kids [3 0 R] /Count 1 >> endobj',
+    `3 0 obj << /Type /Page /Parent 2 0 R /MediaBox [0 0 ${W} ${H}] /Resources << /Font << /F1 4 0 R /F2 5 0 R >> >> /Contents 6 0 R >> endobj`,
+    '4 0 obj << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> endobj',
+    '5 0 obj << /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >> endobj',
+    `6 0 obj << /Length ${stream.length} >> stream\n${stream}\nendstream endobj`
+  ];
+  let pdf = '%PDF-1.4\n';
+  const offsets = [0];
+  for(const oStr of objs){
+    offsets.push(pdf.length);
+    pdf += oStr + '\n';
+  }
+  const xrefPos = pdf.length;
+  pdf += `xref\n0 ${objs.length + 1}\n0000000000 65535 f \n`;
+  for(let i = 1; i <= objs.length; i++){
+    pdf += String(offsets[i]).padStart(10, '0') + ' 00000 n \n';
+  }
+  pdf += `trailer << /Size ${objs.length + 1} /Root 1 0 R >>\nstartxref\n${xrefPos}\n%%EOF`;
+  return new Blob([pdf], {type:'application/pdf'});
+}
+async function saveBinaryOrTextFile(name, blob, fallbackText){
+  try{
+    const file = new File([blob], name, {type: blob.type || 'application/octet-stream'});
+    if(navigator.canShare && navigator.canShare({files:[file]}) && navigator.share){
+      await navigator.share({files:[file], title:name});
+      return true;
+    }
+  }catch(e){
+    if(e && e.name === 'AbortError') return true;
+  }
+  const isWebView = /wv|WebView/i.test(navigator.userAgent || '') || (typeof window.Android !== 'undefined');
+  try{
+    if(!isWebView){
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 5000);
+      return true;
+    }
+  }catch(e){}
+  try{
+    const dataUrl = await new Promise((res, rej) => {
+      const r = new FileReader();
+      r.onload = () => res(r.result);
+      r.onerror = rej;
+      r.readAsDataURL(blob);
+    });
+    const a = document.createElement('a');
+    a.href = dataUrl; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    return true;
+  }catch(e){}
+  if(fallbackText != null){ showExportFallback(name, fallbackText); return false; }
+  return false;
+}
+/* =====================================================================
+   NOTIFICATIONS + OFFLINE-RESILIENT EMAIL DELIVERY
+   ===================================================================== */
+let audioCtx, swReg = null;
+function permState(){ return ('Notification' in window) ? Notification.permission : 'unsupported'; }
+function unlockAudio(){ try{ audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)(); if(audioCtx.state === 'suspended') audioCtx.resume(); }catch(e){} }
+function chime(){
+  if(!state.remind.sound) return;
+  unlockAudio();
+  if(audioCtx){
+    const tm = audioCtx.currentTime;
+    [[880,0],[1318.5,.18],[1760,.36]].forEach(([f,d]) => {
+      const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+      o.type = 'sine'; o.frequency.value = f;
+      g.gain.setValueAtTime(.0001, tm+d); g.gain.exponentialRampToValueAtTime(.35, tm+d+.02); g.gain.exponentialRampToValueAtTime(.0001, tm+d+.6);
+      o.connect(g); g.connect(audioCtx.destination); o.start(tm+d); o.stop(tm+d+.65);
+    });
+  }
+  try{ if(navigator.vibrate) navigator.vibrate([200,100,200]); }catch(e){}
+}
+
+async function setupSW(){
+  if(!('serviceWorker' in navigator) || !/^https?:/.test(location.protocol)) return;
+  try{
+    swReg = await navigator.serviceWorker.register('sw.js');
+    if('sync' in swReg){ try{ await swReg.sync.register('hisab-email-sync'); }catch(e){} }
+    if('periodicSync' in swReg){ try{ await swReg.periodicSync.register('hisab-daily-sync', {minInterval: 12 * 60 * 60 * 1000}); }catch(e){} }
+  }catch(e){}
+}
+async function showSystemNotification(title, body){
+  if(permState() !== 'granted') return;
+  const opts = {body, tag:'hisab-daily', renotify:true, vibrate:[200,100,200], silent:false, icon:ICON_URI, badge:ICON_URI};
+  try{ if(swReg){ await swReg.showNotification(title, opts); return; } }catch(e){}
+  try{ new Notification(title, opts); }catch(e){}
+}
+async function enableAlerts(){
+  unlockAudio(); closeSheet();
+  if(permState() === 'unsupported'){ toast(t('nsT'), t('nsTxt')); return; }
+  let p = permState();
+  if(p === 'default'){ try{ p = await Notification.requestPermission(); }catch(e){} }
+  if(p === 'granted'){
+    state.remind.sound = true;
+    await setupSW(); chime();
+    await showSystemNotification(t('onT'), t('onBody'));
+    toast(t('onT'), t('onTxt'));
+  } else if(p === 'denied'){
+    toast(t('blocked'), t('blockedTxt'));
+  }
+  render();
+}
+function afterLogin(){ render(); setTimeout(() => { flushEmailQueue(); checkReminder(); }, 1200); }
+function alertCard(){
+  const p = permState();
+  if(p === 'granted' || p === 'unsupported') return '';
+  const denied = p === 'denied';
+  return `<div class="sec"><div class="card" style="display:flex;gap:14px;align-items:center">
+    <div style="color:var(--accent)">${ic.bell}</div>
+    <div style="flex:1"><b>${denied ? t('blocked') : t('getReminder')}</b>
+    <div class="small mute">${denied ? t('blockedTxt') : t('getReminderTxt')}</div></div>
+    ${denied ? '' : `<button class="chip go" data-act="enableAlerts">${t('allow')}</button>`}</div></div>`;
+}
+function alertRows(){
+  const p = permState();
+  const label = {granted:t('nOn'), default:t('nDefault'), denied:t('nDenied'), unsupported:t('nUnsup')}[p];
+  const btn = p === 'default' ? `<button class="chip go" data-act="enableAlerts">${t('allow')}</button>` : '';
+  return `<div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><div><b>${t('phoneNotif')}</b><div class="small mute">${label}</div></div>${btn}</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:16px"><div><b id="sl">${t('soundVib')}</b><div class="small mute">${t('soundHint')}</div></div>
+    <button class="sw dk" role="switch" aria-checked="${state.remind.sound}" aria-labelledby="sl" data-act="toggleSound"></button></div>
+    <div style="height:16px;border-bottom:1px solid var(--line);margin-bottom:16px"></div>`;
+}
+function fireReminder(){
+  const tt = totals(), n = customers().filter(c => subMoney(c.bought, c.paid) > 0).length;
+  const msg = !state.orders.length ? t('remNone') : (tt.left > 0 ? t('remDue', {amt:rs(tt.left), n}) : t('remClear'));
+  toast(t('dailyRem'), msg); chime(); showSystemNotification(t('dailyRem'), msg);
+}
+function reminderHtml(extraTitle){
+  const first = esc((state.user.name || '').split(' ')[0] || 'Friend');
+  const tt = totals(), cs = customers().filter(c => subMoney(c.bought, c.paid) > 0);
+  const today = new Date().toDateString();
+  let soldP = 0, recP = 0;
+  state.orders.forEach(o => { if(new Date(o.date).toDateString() === today) soldP += toPaisa(o.total); o.pay.forEach(p => { if(new Date(p.date).toDateString() === today) recP += toPaisa(p.amt); }); });
+  const odAmt = fromPaisa(state.orders.filter(isOverdue).reduce((a,o) => a + toPaisa(leftOf(o)), 0));
+  const lowItems = lowStockItems();
+  const L = [];
+  if(extraTitle) L.push(`<h3>${esc(extraTitle)}</h3>`);
+  L.push(t('remEmailHello',{name:first}) + '<br>' + t('remEmailIntro',{date:dlong(new Date().toISOString())}), '');
+  if(tt.left > 0){
+    L.push(`<b>${t('remEmailToCollect',{amt:rs(tt.left), n:cs.length})}</b>`);
+    if(odAmt > 0) L.push(`<span style="color:#B42B3A">${t('remEmailOverdue',{d:OVERDUE_DAYS, amt:rs(odAmt)})}</span>`);
+  } else L.push(`<b>${t('remEmailClear')}</b>`);
+  L.push(t('remEmailToday',{sold:rs(fromPaisa(soldP)), rec:rs(fromPaisa(recP))}));
+  if(cs.length){ L.push('', `<b>${t('remEmailTop')}</b>`); cs.slice(0,8).forEach(c => L.push(`• ${esc(c.name)} — ${rs(subMoney(c.bought, c.paid))}${c.phone ? ' (' + esc(c.phone) + ')' : ''}`)); }
+  if(lowItems.length){ L.push('', `<b>Low Stock Alert</b>`); lowItems.forEach(p => L.push(`• ${esc(p.name)} (${p.qty} left)`)); }
+  L.push('', `<span style="color:#777">${t('remEmailFoot')} — ${esc(shopName())}</span>`);
+  return L.join('<br>');
+}
+
+function queueEmail(templateId, params){
+  state.emailQueue.push({templateId, params, ts:Date.now()});
+  save();
+  if(swReg && 'sync' in swReg){ try{ swReg.sync.register('hisab-email-sync'); }catch(e){} }
+}
+async function flushEmailQueue(){
+  if(!navigator.onLine || !state.emailQueue.length) return;
+  const remaining = [];
+  let sentCount = 0;
+  for(const item of state.emailQueue){
+    try{
+      await emailSend(item.templateId, item.params);
+      sentCount++;
+    }catch(e){
+      if(Date.now() - item.ts < 7 * 86400000) remaining.push(item);
+    }
+  }
+  state.emailQueue = remaining;
+  save();
+  if(sentCount > 0) toast(t('remSent'), t('queueFlushed', {n:sentCount}));
+}
+window.addEventListener('online', flushEmailQueue);
+
+let lastTry = 0, sendingRem = false;
+async function sendReminderEmail(manual, customSubject, extraTitle){
+  const e = emailCfg();
+  if(!e.reminderTemplate){ if(manual) toast(t('remNoTpl'), t('remNoTplTxt')); return 'notemplate'; }
+  if(sendingRem) return false;
+  sendingRem = true;
+  const to = state.remind.email || state.user.email, tt = totals();
+  const subj = customSubject || (tt.left > 0 ? t('remEmailSubject',{amt:rs(tt.left)}) : t('remEmailSubjectClear'));
+  const params = {to_email:to, subject:subj, message:reminderHtml(extraTitle)};
+  if(!navigator.onLine){
+    queueEmail(e.reminderTemplate, params);
+    sendingRem = false;
+    if(manual) toast('Queued offline', 'Will e-mail automatically as soon as internet connects.');
+    return true;
+  }
+  try{
+    await emailSend(e.reminderTemplate, params);
+    chime();
+    if(manual) toast(t('remSent'), t('remSentTxt',{email:to}));
+    return true;
+  }catch(err){
+    queueEmail(e.reminderTemplate, params);
+    const why = String((err && err.message) || '').replace(/<[^>]*>/g,'').trim().slice(0,120);
+    if(manual) toast(t('remFail'), why);
+    return false;
+  }finally{ sendingRem = false; }
+}
+function timePassed(hm){
+  const [h, m] = String(hm || '20:00').split(':').map(Number), d = new Date();
+  return d.getHours() * 60 + d.getMinutes() >= h * 60 + m;
+}
+async function checkReminder(){
+  const r = state.remind; if(!state.user || !r.on) return;
+  const today = new Date().toDateString();
+  if(r.lastFired === today || !timePassed(r.time)) return;
+  if(!state.orders.length){ r.lastFired = today; save(); return; }
+  if(Date.now() - lastTry < 5 * 60 * 1000) return;
+  lastTry = Date.now();
+  const res = await sendReminderEmail(false);
+  if(res === true){ r.lastFired = today; save(); fireReminder(); }
+  else if(res === 'notemplate'){ r.lastFired = today; save(); fireReminder(); }
+}
+setInterval(checkReminder, 30000);
+document.addEventListener('visibilitychange', () => {
+  if(!document.hidden){ flushEmailQueue(); checkReminder(); }
+  else if(state.user && state.remind.on && state.orders.length) checkReminder();
+});
+
+/* ---------- Actions ---------- */
+function exitSandbox(){
+  if(state.liveBackup){
+    const live = JSON.parse(state.liveBackup);
+    Object.assign(state, live);
+    recalcNext();
+  }
+  state.liveBackup = null;
+  state.sandbox = false;
+}
+
+const A = {
+  lang(d){ applyBrowserLanguage(d.l); closeSheet(); render(); },
+  authMode(d){ state.auth.mode = d.m; state.auth.err = ''; render(); },
+  setup(){ sheetSetup(); },
+  saveSetup(){
+    const g = $('#cfg-g').value.trim(), es = $('#cfg-es').value.trim(), et = $('#cfg-et').value.trim(), ek = $('#cfg-ek').value.trim(), er = $('#cfg-er').value.trim();
+    const err = m => { $('#cfg-err').textContent = m; };
+    if(g && !/^[\w-]+\.apps\.googleusercontent\.com$/.test(g)) return err('That does not look like a Google Client ID.');
+    const any = es || et || ek;
+    if(any && !(es && et && ek)) return err('Fill in all three e-mail values, or leave all three empty.');
+    Store.set('hisab:config', {gClientId:g, emailjs: any ? {service:es, template:et, key:ek} : null, reminderTemplate:er});
+    gsiInitFor = ''; closeSheet(); render(); toast(t('setupSaved'), g ? t('gReady') : t('gNotReady'));
+  },
+  sendCode(d, btn){
+    const em = $('#em').value.trim();
+    state.auth.email = em;
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) return setAuthErr(t('errEmail'));
+    startEmailFlow(em, btn);
+  },
+  resend(d, btn){ startEmailFlow(state.auth.email, btn); },
+  verify(){
+    const a = state.auth, c = $('#cd').value.trim();
+    if(Date.now() > a.exp) return setAuthErr(t('errExpired'));
+    if(!/^\d{6}$/.test(c)) return setAuthErr(t('errCode6'));
+    if(c !== a.code){
+      a.tries++;
+      if(a.tries >= 5){ a.step = 'email'; a.err = t('errTooMany'); render(); return; }
+      return setAuthErr(t('errWrong', {n: 5 - a.tries}));
+    }
+    const nm = a.email.split('@')[0].replace(/[._-]+/g,' ').replace(/ \w/g, x => x.toUpperCase());
+    login({name:nm || 'Friend', email:a.email.toLowerCase(), picture:'', via:'E-mail'});
+  },
+  authBack(){ state.auth.step = 'email'; state.auth.err = ''; render(); },
+  backStart(){ state.auth.step = 'start'; state.auth.err = ''; render(); },
+  emailStep(){ state.auth.step = 'email'; state.auth.err = ''; render(); },
+  google(){ startGoogle(); },
+  continueLast(d, btn){
+    const last = Store.get('hisab:last'); if(!last) return;
+    if(last.via === 'Google') startGoogle(last.email);
+    else { state.auth.mode = 'login'; startEmailFlow(last.email, btn); }
+  },
+  legal(d){ sheetLegal(d.d); },
+  goto(d){ state.tab = d.t; closeSheet(); render(); window.scrollTo(0,0); },
+  period(d){ state.period = d.p; render(); },
+  toggleCredit(){ state.includeCredit = !state.includeCredit; render(); },
+  filter(d){ state.filter = d.f; render(); },
+  newSale(){ sheetNewSale(); },
+  closeSheet(){ closeSheet(); },
+  setWalkIn(){ $('#s-name').value = t('walkIn'); $('#s-item').focus(); },
+  toggleMulti(){
+    isMultiBill = !isMultiBill;
+    $('#single-item-wrap').hidden = isMultiBill;
+    $('#bill-lines-wrap').hidden = !isMultiBill;
+    $('#toggle-multi').textContent = isMultiBill ? t('singleItem') : t('multiItem');
+    if(isMultiBill) renderBillLines();
+  },
+  addLine(){ billLines.push({name:'', qty:1, rate:''}); renderBillLines(); },
+  delLine(d){ billLines.splice(+d.idx, 1); if(!billLines.length) billLines.push({name:'', qty:1, rate:''}); renderBillLines(); },
+  kind(d){
+    saleKind = d.k;
+    document.querySelectorAll('#s-kind button').forEach(b => b.setAttribute('aria-pressed', b.dataset.k === d.k));
+    $('#s-credit').hidden = d.k !== 'credit';
+    if(d.k === 'credit') autoPhone();
+  },
+  advm(d){ window._advm = d.k; document.querySelectorAll('#s-advm button').forEach(b => b.setAttribute('aria-pressed', b.dataset.k === d.k)); },
+  pm(d){ window._pm = d.k; document.querySelectorAll('#p-m button').forEach(b => b.setAttribute('aria-pressed', b.dataset.k === d.k)); },
+  saveSale(d){
+    const name = $('#s-name').value.trim();
+    const err = m => { $('#s-err').textContent = m; };
+    if(!name) return err(t('errName'));
+
+    let itemDesc = '', costTotalP = 0;
+    if(isMultiBill){
+      const valid = billLines.filter(l => l.name.trim() && Number(l.rate) > 0);
+      if(!valid.length) return err(t('errItem'));
+      itemDesc = valid.map(l => `${l.name.trim()} (${l.qty}×${l.rate})`).join(', ');
+      valid.forEach(l => {
+        const prod = state.products.find(p => p.name.toLowerCase() === l.name.trim().toLowerCase());
+        if(prod){
+          prod.qty = Math.max(0, Number(prod.qty) - (Number(l.qty) || 1));
+          costTotalP += toPaisa(mulMoney(prod.cost || 0, l.qty));
+        }
+      });
+    } else {
+      itemDesc = $('#s-item').value.trim();
+      if(!itemDesc) return err(t('errItem'));
+      const prod = state.products.find(p => p.name.toLowerCase() === itemDesc.toLowerCase());
+      if(prod){
+        prod.qty = Math.max(0, Number(prod.qty) - 1);
+        costTotalP += toPaisa(prod.cost || 0);
+      }
+    }
+
+    const amt = recalcBillTotal() || parseFloat($('#s-amt').value);
+    if(!(amt > 0)) return err(t('errAmt'));
+    const profit = costTotalP > 0 ? subMoney(amt, fromPaisa(costTotalP)) : null;
+
+    const existingCust = customers().find(c => c.name.toLowerCase() === name.toLowerCase());
+    const cMeta = state.custMeta[name.toLowerCase()];
+    if(saleKind === 'credit' && cMeta && cMeta.limit > 0){
+      const curDue = existingCust ? subMoney(existingCust.bought, existingCust.paid) : 0;
+      const adv = parseFloat($('#s-adv').value) || 0;
+      if(addMoney(curDue, subMoney(amt, adv)) > cMeta.limit){
+        toast('⚠️ Credit Limit', t('creditWarn', {lim:rs(cMeta.limit)}));
+      }
+    }
+
+    let phone = '', pay = [];
+    if(saleKind === 'credit'){
+      phone = $('#s-phone').value.trim();
+      if(!/^\+?\d{7,15}$/.test(phone.replace(/[\s-]/g,''))) return err(t('errPhone'));
+      const adv = parseFloat($('#s-adv').value) || 0;
+      if(adv < 0 || adv > amt) return err(t('errAdv'));
+      if(adv > 0) pay.push({amt:adv, m:window._advm, date:new Date().toISOString()});
+    } else {
+      phone = existingCust ? existingCust.phone : '';
+      pay.push({amt, m:saleKind, date:new Date().toISOString()});
+    }
+
+    const o = {id:nextId++, customer:name, phone, item:itemDesc, total:amt, profit, kind:saleKind, date:new Date().toISOString(), pay};
+    state.orders.push(o);
+    logAudit('SALE_RECORDED', `${orderLabel(o)}: ${name} · ${itemDesc} · ${rs(amt)} (${saleKind})`);
+    closeSheet(); render();
+    toast(t('saleSaved',{id:orderLabel(o)}), saleKind === 'credit' ? t('toComeFrom',{amt:rs(subMoney(amt, paidOf(o))), name}) : t('recvBy',{amt:rs(amt), m:mLabel(saleKind)}));
+    if(d && d.again) setTimeout(() => sheetNewSale(), 250);
+  },
+  openOrder(d){ sheetOrder(+d.id); },
+  openCustomer(d){ sheetCustomer(d.n); },
+  saveCustLim(d){
+    const lim = parseFloat($('#c-lim').value) || 0;
+    state.custMeta[d.n.toLowerCase()] = {limit: lim};
+    logAudit('CREDIT_LIMIT', `Set credit limit for ${d.n} to ${rs(lim)}`);
+    save(); toast('Credit limit saved', lim > 0 ? rs(lim) : 'Cleared');
+  },
+  savePay(d){
+    const o = state.orders.find(x => x.id === +d.id), v = parseFloat($('#p-amt').value);
+    if(!(v > 0)){ $('#p-err').textContent = t('errPayAmt'); return; }
+    if(v > leftOf(o) + 0.001){ $('#p-err').textContent = t('errPayMax',{amt:rs(leftOf(o))}); return; }
+    o.pay.push({amt:v, m:window._pm, date:new Date().toISOString()});
+    logAudit('PAYMENT_RECEIVED', `${orderLabel(o)}: ${rs(v)} from ${o.customer} via ${mLabel(window._pm)}`);
+    closeSheet(); render();
+    toast(t('payToast'), t('payToastTxt',{amt:rs(v), name:o.customer, rest: leftOf(o) ? t('stillLeft',{amt:rs(leftOf(o))}) : t('fullyPaid',{id:orderLabel(o)})}));
+  },
+  editOrder(d){ sheetEdit(+d.id); },
+  repeatOrder(d){ const o = state.orders.find(x => x.id === +d.id); if(o) sheetNewSale({customer:o.customer, item:o.item, total:o.total}); },
+  pickItem(d){
+    const o = (window._recent || [])[+d.i]; if(!o) return;
+    if(isMultiBill){
+      billLines[billLines.length - 1] = {name:o.item, qty:1, rate:o.total};
+      renderBillLines();
+    } else {
+      $('#s-item').value = o.item; $('#s-amt').value = o.total; recalcBillTotal();
+    }
+  },
+  openStock(){ sheetStock(); },
+  saveProd(){
+    const name = $('#pr-name').value.trim(), price = parseFloat($('#pr-price').value);
+    const cost = parseFloat($('#pr-cost').value) || 0, qty = parseInt($('#pr-qty').value) || 0, low = parseInt($('#pr-low').value) || 5;
+    if(!name || !(price > 0)) return;
+    const id = state.products.reduce((m,p) => Math.max(m, p.id), 0) + 1;
+    state.products.push({id, name, price, cost, qty, low});
+    logAudit('STOCK_ADDED', `${name} · Price ${rs(price)} · Qty ${qty}`);
+    save(); sheetStock(); toast(t('prodSaved'), name);
+  },
+  delProd(d){ state.products = state.products.filter(p => p.id !== +d.id); save(); sheetStock(); },
+  dayClose(){ sheetDayClose(); },
+  async doDayClose(){
+    try {
+      const actEl = $('#dc-act'), openEl = $('#dc-open');
+      const act = actEl ? (parseFloat(actEl.value) || 0) : 0;
+      const exp = openEl && openEl.dataset ? (parseFloat(openEl.dataset.expected) || 0) : 0;
+      const diff = subMoney(act, exp);
+      const todayKey = dkey(new Date().toISOString());
+      
+      if(!state.lockedDates.includes(todayKey)) state.lockedDates.push(todayKey);
+      await createSnapshot(`Day Close (${todayKey})`);
+      await logAudit('DAY_CLOSE_LOCKED', `Closed & locked ${todayKey} · Counted ${rs(act)} (Diff ${rs(diff)})`);
+      
+      closeSheet();
+      render();
+      toast(t('eodSent'), '');
+      
+      try {
+        await sendReminderEmail(true, `Hisab Day Close: ${shopName()} (${dshort(new Date().toISOString())})`, `End-of-Day Cash Drawer Report · Counted: ${rs(act)} (Diff: ${rs(diff)})`);
+      } catch(err) {
+        console.log("Email dispatch skipped or queued:", err);
+      }
+    } catch(e) {
+      console.error("Day Close error:", e);
+      toast("Error", "Could not complete day close.");
+    }
+  },
+  overdueNotify(){
+    sendReminderEmail(true, `Hisab Overdue Dues Alert: ${shopName()}`, 'Overdue Customer Credit Summary');
+  },
+  openAudit(){ sheetAudit(); },
+  openSnapshots(){ sheetSnapshots(); },
+  async takeSnapshot(){ await createSnapshot('Manual Checkpoint'); sheetSnapshots(); toast('Snapshot Created', 'Local recovery point saved.'); },
+  rollbackSnapshot(d){
+    const snap = state.snapshots[+d.idx]; if(!snap) return;
+    const obj = JSON.parse(snap.data);
+    state.orders = obj.orders || []; state.expenses = obj.expenses || [];
+    state.products = obj.products || []; state.custMeta = obj.custMeta || {};
+    state.lockedDates = obj.lockedDates || [];
+    recalcNext();
+    logAudit('SNAPSHOT_ROLLBACK', `Restored state to ${snap.label} (${dshort(snap.ts)})`);
+    closeSheet(); render();
+    toast('Rollback Complete', `Restored to ${snap.label}`);
+  },
+  openGov(){ sheetGovernance(); },
+  setRole(d){
+    if(d.r === 'supervisor' && state.role === 'operator' && state.pin){
+      const entered = prompt('Enter 4-digit Supervisor PIN:');
+      if(entered !== state.pin) return toast('Access Denied', 'Incorrect Supervisor PIN.');
+    }
+    state.role = d.r;
+    logAudit('ROLE_SWITCH', `Switched active role to ${d.r}`);
+    sheetGovernance(); render();
+  },
+  savePin(){
+    const p = $('#gov-pin').value.trim();
+    if(p && !/^\d{4}$/.test(p)) return toast('Invalid PIN', 'Enter a 4-digit numeric PIN.');
+    state.pin = p; save(); toast('Supervisor PIN Updated', p ? 'PIN protection enabled' : 'PIN cleared');
+  },
+  unlockDate(d){
+    if(state.role !== 'supervisor') return toast('Access Denied', 'Supervisor role required to unlock periods.');
+    state.lockedDates = state.lockedDates.filter(x => x !== d.dt);
+    logAudit('PERIOD_UNLOCKED', `Unlocked closed period ${d.dt}`);
+    sheetGovernance(); render();
+  },
+  toggleSandbox(){
+    if(!state.sandbox){
+      state.liveBackup = JSON.stringify(snapshotObj());
+      state.sandbox = true;
+      toast('Sandbox Active', 'Experiment freely—live ledger is safely frozen.');
+    } else {
+      exitSandbox();
+      toast('Sandbox Exited', 'Live books restored intact.');
+    }
+    closeSheet(); render();
+  },
+  openAnomalies(){ sheetAnomalies(); },
+  openCmd(){ openCmdPalette(); },
+  cpm(d){ window._cpm = d.k; document.querySelectorAll('#cp-m button').forEach(b => b.setAttribute('aria-pressed', b.dataset.k === d.k)); },
+  custPay(d){
+    const c = customers().find(x => x.name === d.n); if(!c) return;
+    const left = subMoney(c.bought, c.paid), v = parseFloat($('#cp-amt').value);
+    if(!(v > 0)){ $('#cp-err').textContent = t('errPayAmt'); return; }
+    if(v > left + 0.001){ $('#cp-err').textContent = t('errPayMaxC',{amt:rs(left)}); return; }
+    let rest = v;
+    [...c.orders].sort((a,b) => new Date(a.date) - new Date(b.date)).forEach(o => {
+      if(rest <= 0) return; const l = leftOf(o); if(l <= 0) return;
+      const take = Math.min(l, rest); o.pay.push({amt:take, m:window._cpm, date:new Date().toISOString()}); rest = subMoney(rest, take);
+    });
+    logAudit('BULK_PAYMENT', `${rs(v)} collected from ${c.name} via ${mLabel(window._cpm)}`);
+    render(); sheetCustomer(c.name); toast(t('payToast'), t('custPayTxt',{amt:rs(v), name:c.name}));
+  },
+  addExp(){ sheetExpense(); },
+  collect(){ sheetCollect(); },
+  expList(){ sheetExpList(); },
+  expNote(d){ $('#x-note').value = d.v; $('#x-amt').focus(); },
+  saveExp(){
+    const note = $('#x-note').value.trim().slice(0,80), amt = parseFloat($('#x-amt').value);
+    if(!note){ $('#x-err').textContent = t('errExpNote'); return; }
+    if(!(amt > 0)){ $('#x-err').textContent = t('errExpAmt'); return; }
+    const id = state.expenses.reduce((m,x) => Math.max(m, x.id), 0) + 1;
+    state.expenses.push({id, note, amt, date:new Date().toISOString()});
+    logAudit('EXPENSE_ADDED', `${note} · ${rs(amt)}`);
+    closeSheet(); render(); toast(t('expSaved'), `${note} · ${rs(amt)}`);
+  },
+  delExp(d){
+    if(state.role !== 'supervisor') return toast('Access Denied', 'Supervisor role required.');
+    state.expenses = state.expenses.filter(x => x.id !== +d.id);
+    logAudit('EXPENSE_DELETED', `Deleted expense #${d.id}`);
+    render(); sheetExpList(); toast(t('expDeleted'), '');
+  },
+  saveEdit(d){
+    const o = state.orders.find(x => x.id === +d.id); if(!o) return;
+    if(isDateLocked(o.date)) return toast('Locked Period', t('periodLockedMsg'));
+    const name = $('#e-name').value.trim(), item = $('#e-item').value.trim(), total = parseFloat($('#e-total').value), phone = $('#e-phone').value.trim();
+    const err = m => { $('#e-err').textContent = m; };
+    if(!name) return err(t('errName'));
+    if(!item) return err(t('errItem'));
+    if(!(total > 0)) return err(t('errAmt'));
+    if(total < paidOf(o)) return err(t('errTotalLess',{amt:rs(paidOf(o))}));
+    if(phone && !/^\+?\d{7,15}$/.test(phone.replace(/[\s-]/g,''))) return err(t('errPhone'));
+    o.customer = name; o.item = item; o.total = total; o.phone = phone;
+    logAudit('ORDER_EDITED', `Edited ${orderLabel(o)}: ${name} · ${item} · ${rs(total)}`);
+    render(); sheetOrder(o.id); toast(t('updated'), orderLabel(o));
+  },
+  askDelOrder(d){ const o = state.orders.find(x => x.id === +d.id); if(!o) return; sheetConfirm({title:t('delT',{id:orderLabel(o)}), text:t('delTxt'), label:t('delBtn'), act:'doDelOrder', attrs:`data-id="${o.id}"`, back:o.id}); },
+  doDelOrder(d){
+    const o = state.orders.find(x => x.id === +d.id);
+    if(o && isDateLocked(o.date)) return toast('Locked Period', t('periodLockedMsg'));
+    state.orders = state.orders.filter(x => x.id !== +d.id);
+    if(o) logAudit('ORDER_DELETED', `Deleted ${orderLabel(o)} (${o.customer}, ${rs(o.total)})`);
+    closeSheet(); render(); if(o) toast(t('deleted',{id:orderLabel(o)}), '');
+  },
+  askDelPay(d){ const o = state.orders.find(x => x.id === +d.id); if(!o || !o.pay[+d.i]) return;
+    sheetConfirm({title:t('delPayT'), text:t('delPayTxt',{amt:rs(o.pay[+d.i].amt), id:orderLabel(o)}), label:t('remove'), act:'doDelPay', attrs:`data-id="${o.id}" data-i="${+d.i}"`, back:o.id}); },
+  doDelPay(d){
+    const o = state.orders.find(x => x.id === +d.id); if(!o) return;
+    const removed = o.pay.splice(+d.i, 1)[0];
+    if(removed) logAudit('PAYMENT_REMOVED', `Removed ${rs(removed.amt)} payment from ${orderLabel(o)}`);
+    render(); sheetOrder(o.id); toast(t('payRemoved'), orderLabel(o));
+  },
+  receipt(d){ sheetReceipt(+d.id); },
+  shareReceipt(d){
+    const o = state.orders.find(x => x.id === +d.id); if(!o) return;
+    const text = receiptText(o);
+    if(navigator.share){ navigator.share({title:`${t('receiptT')} ${orderLabel(o)}`, text}).catch(() => {}); return; }
+    try{ navigator.clipboard.writeText(text).then(() => toast(t('copied'), t('copiedTxt')), () => toast(t('copied'), '')); }catch(e){ toast(t('copied'), ''); }
+  },
+  copyExportRaw(){
+    const el = $('#exp-raw'); if(!el) return;
+    el.select();
+    try{ navigator.clipboard.writeText(el.value); toast(t('copied'), ''); }catch(e){ document.execCommand('copy'); toast(t('copied'), ''); }
+  },
+  async printReceipt(d){
+    const o = state.orders.find(x => x.id === +(d && d.id));
+    if(!o){ window.print(); return; }
+    const s = state.shop, left = leftOf(o);
+    const safeItem = String(o.item || orderLabel(o)).replace(/[\\/:*?"<>|]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 60) || orderLabel(o);
+    const fileName = safeItem + '.pdf';
+    const pdfBlob = buildReceiptPdfBlob(o, s, left);
+    const saved = await saveBinaryOrTextFile(fileName, pdfBlob, null);
+    if(saved) toast('PDF Saved', fileName);
+    else window.print();
+  },
+  editShop(){ sheetShop(); },
+  saveShop(){ state.shop = {name:$('#sh-n').value.trim().slice(0,80), phone:$('#sh-p').value.trim().slice(0,30), address:$('#sh-a').value.trim().slice(0,120), pan:$('#sh-pan').value.trim().slice(0,30)}; closeSheet(); render(); toast(t('shopSaved'), ''); },
+  toggleRemind(){ state.remind.on = !state.remind.on; if(state.remind.on) state.remind.lastFired = timePassed(state.remind.time) ? new Date().toDateString() : ''; render(); },
+  toggleSound(){ state.remind.sound = !state.remind.sound; if(state.remind.sound){ unlockAudio(); chime(); } render(); },
+  enableAlerts(){ enableAlerts(); },
+  testRemind(){ unlockAudio(); sendReminderEmail(true); },
+  logout(){ logout(); }
+};
+
+document.addEventListener('click', e => {
+  if(e.target.id === 'cmd-modal'){ closeCmdPalette(); return; }
+  const cmdBtn = e.target.closest('[data-cmd]');
+  if(cmdBtn){
+    const item = (window._cmdFiltered || [])[+cmdBtn.dataset.cmd];
+    closeCmdPalette(); if(item) item.fn(); return;
+  }
+  const el = e.target.closest('[data-act]'); if(!el) return;
+  const f = A[el.dataset.act]; if(f) f(el.dataset, el);
+});
+document.addEventListener('keydown', e => {
+  if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k'){
+    e.preventDefault();
+    if(state.user) openCmdPalette();
+    return;
+  }
+  if(e.key === 'Escape'){ closeCmdPalette(); closeSheet(); return; }
+  if(e.key !== 'Enter') return;
+  if(e.target.id === 'cmd-in'){
+    const first = (window._cmdFiltered || [])[0];
+    closeCmdPalette(); if(first) first.fn();
+  }
+  else if(e.target.id === 'em') A.sendCode({}, document.querySelector('[data-act="sendCode"]'));
+  else if(e.target.id === 'cd') A.verify();
+});
+document.addEventListener('input', e => {
+  const el = e.target;
+  if(el.id === 'cmd-in'){ renderCmdList(el.value); return; }
+  if(el.id === 's-name') autoPhone();
+  if(el.id === 's-item'){
+    const prod = state.products.find(p => p.name.toLowerCase() === el.value.trim().toLowerCase());
+    if(prod && $('#s-amt')){ $('#s-amt').value = prod.price; recalcBillTotal(); }
+  }
+  if(['s-amt','s-disc','s-tax','s-tend'].includes(el.id)) recalcBillTotal();
+  if(el.dataset && el.dataset.line != null){
+    const idx = +el.dataset.line, f = el.dataset.f;
+    billLines[idx][f] = el.value;
+    if(f === 'name'){
+      const prod = state.products.find(p => p.name.toLowerCase() === el.value.trim().toLowerCase());
+      if(prod){ billLines[idx].rate = prod.price; renderBillLines(); return; }
+    }
+    recalcBillTotal();
+  }
+  if(el.id === 'dc-act' || el.id === 'dc-open'){
+    const open = parseFloat(($('#dc-open')||{}).value) || 0;
+    const exp = addMoney(parseFloat(($('#dc-open')||{}).dataset.expected) || 0, open);
+    const act = parseFloat(($('#dc-act')||{}).value) || 0;
+    const diff = subMoney(act, exp);
+    const bar = $('#dc-diff-bar');
+    if(bar){
+      bar.style.background = diff === 0 ? 'var(--ok-bg)' : 'var(--due-bg)';
+      bar.style.color = diff === 0 ? 'var(--ok)' : 'var(--due)';
+      bar.innerHTML = `<span>${t('cashDiff')}</span><b>${(diff > 0 ? '+' : '') + rs(diff)}</b>`;
+    }
+  }
+  if(el.id === 'cd' && /^\d{6}$/.test(el.value)) A.verify();
+  if(el.dataset && el.dataset.input === 'cq'){ state.cq = el.value; const l = $('#ctable'); if(l) l.innerHTML = customersInner(); }
+  if(el.dataset && el.dataset.input === 'q'){ state.q = el.value; const l = $('#olist'); if(l) l.innerHTML = ordersListHtml(); }
+});
+document.addEventListener('change', e => {
+  const el = e.target;
+  if(el.dataset && el.dataset.change === 'langSelect'){
+    applyBrowserLanguage(el.value); closeSheet(); render();
+  }
+  if(el.dataset && el.dataset.change === 'setTime'){
+    state.remind.time = el.value || '20:00';
+    state.remind.lastFired = timePassed(state.remind.time) ? new Date().toDateString() : '';
+    save(); toast(t('remTimeSet'), t('remTimeTxt',{time:state.remind.time}));
+  }
+  if(el.dataset && el.dataset.change === 'remindEmail'){
+    const v = el.value.trim();
+    if(v && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)){ toast(t('errEmail'), ''); return; }
+    state.remind.email = v; save(); toast(t('remEmailSaved'), v || state.user.email);
+  }
+});
+
+/* ---------- Safe Boot ---------- */
+function boot(){
+  try{
+    const l = Store.get('hisab:lang');
+    if(l) applyBrowserLanguage(l);
+    else if((navigator.language || '').toLowerCase().startsWith('ne')) applyBrowserLanguage('ne');
+    const s = Store.get('hisab:session');
+    if(s && s.user && s.user.email){ openAccount(s.user); state.tab = 'home'; }
+  }catch(e){ console.error(e); }
+  render();
+  setupSW();
+  setTimeout(() => { flushEmailQueue(); checkReminder(); }, 1500);
+}
+if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+else boot();
+window.addEventListener('pageshow', () => { const app = $('#app'); if(app && !app.innerHTML.trim()) render(); });
+setTimeout(() => { const app = $('#app'); if(app && !app.innerHTML.trim()) boot(); }, 350);
+</script>
+</body>
+</html>
